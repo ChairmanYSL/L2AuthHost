@@ -1,0 +1,157 @@
+2023/8/20 10:58:45: Welcome
+2023/8/20 10:58:45: Cur host name: bruce
+2023/8/20 10:58:45: IP Address in local computer: 
+2023/8/20 10:58:45: 192.168.1.2
+2023/8/20 10:58:45: curDir: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug
+2023/8/20 10:58:45: Config Dir: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config
+2023/8/20 10:58:45: Brand Name: Discover
+2023/8/20 10:58:45: Brand Name: EMV_PBOC
+2023/8/20 10:58:45: Brand Name: ExpressPay
+2023/8/20 10:58:45: Brand Name: JCB
+2023/8/20 10:58:45: Brand Name: Paypass
+2023/8/20 10:58:45: Brand Name: Paywave
+2023/8/20 10:58:45: Brand Name: Pure
+2023/8/20 10:58:45: Brand Name: qPBOC
+2023/8/20 10:58:45: Brand Name: Rupay
+2023/8/20 10:58:45: comboBox_Brand.Items.Count: 9
+2023/8/20 10:58:45: info: Input Brand Name: Discover
+2023/8/20 10:58:45: Cur Brand Name:Discover
+2023/8/20 10:58:45: AID Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\AID
+2023/8/20 10:58:45: CAPK Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\CAPK
+2023/8/20 10:58:45: Exception_File Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\Exception_File
+2023/8/20 10:58:45: SimData Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\SimData
+2023/8/20 10:58:45: Revocation_CAPK Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\Revocation_CAPK
+2023/8/20 10:58:45: DRL Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\DRL
+2023/8/20 10:58:45: comboBox_Brand.SelectedIndex: 0
+2023/8/20 10:58:45: info: Input Brand Name: Discover
+2023/8/20 10:58:45: Cur Brand Name:Discover
+2023/8/20 10:58:45: AID Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\AID
+2023/8/20 10:58:45: CAPK Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\CAPK
+2023/8/20 10:58:45: Exception_File Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\Exception_File
+2023/8/20 10:58:45: SimData Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\SimData
+2023/8/20 10:58:45: Revocation_CAPK Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\Revocation_CAPK
+2023/8/20 10:58:45: DRL Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\DRL
+2023/8/20 10:59:56: Welcome
+2023/8/20 10:59:56: Cur host name: bruce
+2023/8/20 10:59:56: IP Address in local computer: 
+2023/8/20 10:59:56: 192.168.1.2
+2023/8/20 10:59:56: curDir: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug
+2023/8/20 10:59:56: Config Dir: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config
+2023/8/20 10:59:56: Brand Name: Discover
+2023/8/20 10:59:56: Brand Name: EMV_PBOC
+2023/8/20 10:59:56: Brand Name: ExpressPay
+2023/8/20 10:59:56: Brand Name: JCB
+2023/8/20 10:59:56: Brand Name: Paypass
+2023/8/20 10:59:56: Brand Name: Paywave
+2023/8/20 10:59:56: Brand Name: Pure
+2023/8/20 10:59:56: Brand Name: qPBOC
+2023/8/20 10:59:56: Brand Name: Rupay
+2023/8/20 10:59:56: comboBox_Brand.Items.Count: 9
+2023/8/20 10:59:56: info: Input Brand Name: Discover
+2023/8/20 10:59:56: Cur Brand Name:Discover
+2023/8/20 10:59:56: AID Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\AID
+2023/8/20 10:59:56: CAPK Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\CAPK
+2023/8/20 10:59:56: Exception_File Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\Exception_File
+2023/8/20 10:59:56: SimData Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\SimData
+2023/8/20 10:59:56: Revocation_CAPK Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\Revocation_CAPK
+2023/8/20 10:59:56: DRL Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\DRL
+2023/8/20 10:59:56: comboBox_Brand.SelectedIndex: 0
+2023/8/20 10:59:56: info: Input Brand Name: Discover
+2023/8/20 10:59:56: Cur Brand Name:Discover
+2023/8/20 10:59:56: AID Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\AID
+2023/8/20 10:59:56: CAPK Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\CAPK
+2023/8/20 10:59:56: Exception_File Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\Exception_File
+2023/8/20 10:59:56: SimData Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\SimData
+2023/8/20 10:59:56: Revocation_CAPK Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\Revocation_CAPK
+2023/8/20 10:59:56: DRL Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\DRL
+2023/8/20 11:00:03: info: Input Brand Name: Pure
+2023/8/20 11:00:03: Cur Brand Name:Pure
+2023/8/20 11:00:03: AID Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Pure\AID
+2023/8/20 11:00:03: CAPK Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Pure\CAPK
+2023/8/20 11:00:03: Exception_File Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Pure\Exception_File
+2023/8/20 11:00:03: SimData Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Pure\SimData
+2023/8/20 11:00:03: Revocation_CAPK Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Pure\Revocation_CAPK
+2023/8/20 11:00:03: DRL Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Pure\DRL
+2023/8/20 11:00:46: Welcome
+2023/8/20 11:00:46: Cur host name: bruce
+2023/8/20 11:00:46: IP Address in local computer: 
+2023/8/20 11:00:46: 192.168.1.2
+2023/8/20 11:00:46: curDir: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug
+2023/8/20 11:00:46: Config Dir: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config
+2023/8/20 11:00:46: Brand Name: Discover
+2023/8/20 11:00:46: Brand Name: EMV_PBOC
+2023/8/20 11:00:46: Brand Name: ExpressPay
+2023/8/20 11:00:46: Brand Name: JCB
+2023/8/20 11:00:46: Brand Name: Paypass
+2023/8/20 11:00:46: Brand Name: Paywave
+2023/8/20 11:00:46: Brand Name: Pure
+2023/8/20 11:00:46: Brand Name: qPBOC
+2023/8/20 11:00:46: Brand Name: Rupay
+2023/8/20 11:00:46: comboBox_Brand.Items.Count: 9
+2023/8/20 11:00:46: info: Input Brand Name: Discover
+2023/8/20 11:00:46: Cur Brand Name:Discover
+2023/8/20 11:00:46: AID Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\AID
+2023/8/20 11:00:46: CAPK Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\CAPK
+2023/8/20 11:00:46: Exception_File Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\Exception_File
+2023/8/20 11:00:46: SimData Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\SimData
+2023/8/20 11:00:46: Revocation_CAPK Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\Revocation_CAPK
+2023/8/20 11:00:46: DRL Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\DRL
+2023/8/20 11:00:46: comboBox_Brand.SelectedIndex: 0
+2023/8/20 11:00:46: info: Input Brand Name: Discover
+2023/8/20 11:00:46: Cur Brand Name:Discover
+2023/8/20 11:00:46: AID Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\AID
+2023/8/20 11:00:46: CAPK Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\CAPK
+2023/8/20 11:00:46: Exception_File Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\Exception_File
+2023/8/20 11:00:46: SimData Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\SimData
+2023/8/20 11:00:46: Revocation_CAPK Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\Revocation_CAPK
+2023/8/20 11:00:46: DRL Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\DRL
+2023/8/20 11:00:49: info: Input Brand Name: Pure
+2023/8/20 11:00:49: Cur Brand Name:Pure
+2023/8/20 11:00:49: AID Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Pure\AID
+2023/8/20 11:00:49: CAPK Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Pure\CAPK
+2023/8/20 11:00:49: Exception_File Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Pure\Exception_File
+2023/8/20 11:00:49: SimData Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Pure\SimData
+2023/8/20 11:00:49: Revocation_CAPK Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Pure\Revocation_CAPK
+2023/8/20 11:00:49: DRL Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Pure\DRL
+2023/8/20 12:04:11: Welcome
+2023/8/20 12:04:11: Cur host name: bruce
+2023/8/20 12:04:11: IP Address in local computer: 
+2023/8/20 12:04:11: 192.168.1.2
+2023/8/20 12:04:11: curDir: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug
+2023/8/20 12:04:11: Config Dir: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config
+2023/8/20 12:04:11: Brand Name: Discover
+2023/8/20 12:04:11: Brand Name: EMV_PBOC
+2023/8/20 12:04:11: Brand Name: ExpressPay
+2023/8/20 12:04:11: Brand Name: JCB
+2023/8/20 12:04:11: Brand Name: Paypass
+2023/8/20 12:04:11: Brand Name: Paywave
+2023/8/20 12:04:11: Brand Name: Pure
+2023/8/20 12:04:11: Brand Name: qPBOC
+2023/8/20 12:04:11: Brand Name: Rupay
+2023/8/20 12:04:11: comboBox_Brand.Items.Count: 9
+2023/8/20 12:04:11: info: Input Brand Name: Discover
+2023/8/20 12:04:11: Cur Brand Name:Discover
+2023/8/20 12:04:11: AID Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\AID
+2023/8/20 12:04:11: CAPK Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\CAPK
+2023/8/20 12:04:11: Exception_File Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\Exception_File
+2023/8/20 12:04:11: SimData Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\SimData
+2023/8/20 12:04:11: Revocation_CAPK Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\Revocation_CAPK
+2023/8/20 12:04:11: DRL Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\DRL
+2023/8/20 12:04:11: comboBox_Brand.SelectedIndex: 0
+2023/8/20 12:04:11: info: Input Brand Name: Discover
+2023/8/20 12:04:11: Cur Brand Name:Discover
+2023/8/20 12:04:11: AID Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\AID
+2023/8/20 12:04:11: CAPK Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\CAPK
+2023/8/20 12:04:11: Exception_File Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\Exception_File
+2023/8/20 12:04:11: SimData Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\SimData
+2023/8/20 12:04:11: Revocation_CAPK Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\Revocation_CAPK
+2023/8/20 12:04:11: DRL Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Discover\DRL
+2023/8/20 12:04:14: info: Input Brand Name: Pure
+2023/8/20 12:04:14: Cur Brand Name:Pure
+2023/8/20 12:04:14: AID Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Pure\AID
+2023/8/20 12:04:14: CAPK Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Pure\CAPK
+2023/8/20 12:04:14: Exception_File Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Pure\Exception_File
+2023/8/20 12:04:14: SimData Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Pure\SimData
+2023/8/20 12:04:14: Revocation_CAPK Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Pure\Revocation_CAPK
+2023/8/20 12:04:14: DRL Dir Name: E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Pure\DRL
+2023/8/20 12:04:15: Load AID File:E:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config\Pure\AID\PURE_CONF001.xml

@@ -1,0 +1,36 @@
+2023/8/17 20:24:57: Welcome
+2023/8/17 20:24:57: curDir: D:\VS_Project\AuthHost\AuthHost\bin\x64\Debug
+2023/8/17 20:24:57: Config Dir: D:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config
+2023/8/17 20:24:57: Brand Name: Discover
+2023/8/17 20:24:57: Brand Name: EMV_PBOC
+2023/8/17 20:24:57: Brand Name: ExpressPay
+2023/8/17 20:24:57: Brand Name: JCB
+2023/8/17 20:24:57: Brand Name: Paypass
+2023/8/17 20:24:57: Brand Name: Paywave
+2023/8/17 20:24:57: Brand Name: Pure
+2023/8/17 20:24:57: Brand Name: qPBOC
+2023/8/17 20:24:57: Brand Name: Rupay
+2023/8/17 20:24:57: comboBox_Brand.Items.Count: 9
+2023/8/17 20:24:57: comboBox_Brand.SelectedIndex: 0
+2023/8/17 20:24:57: comboBox_Brand.SelectedItem: 
+2023/8/17 20:24:58: Error: Get Cur Brand From ComboBox Error
+2023/8/17 20:25:34: Welcome
+2023/8/17 20:25:34: curDir: D:\VS_Project\AuthHost\AuthHost\bin\x64\Debug
+2023/8/17 20:25:34: Config Dir: D:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config
+2023/8/17 20:25:34: Brand Name: Discover
+2023/8/17 20:26:13: Welcome
+2023/8/17 20:26:13: curDir: D:\VS_Project\AuthHost\AuthHost\bin\x64\Debug
+2023/8/17 20:26:13: Config Dir: D:\VS_Project\AuthHost\AuthHost\bin\x64\Debug\Config
+2023/8/17 20:26:13: Brand Name: Discover
+2023/8/17 20:26:13: Brand Name: EMV_PBOC
+2023/8/17 20:26:13: Brand Name: ExpressPay
+2023/8/17 20:26:13: Brand Name: JCB
+2023/8/17 20:26:13: Brand Name: Paypass
+2023/8/17 20:26:13: Brand Name: Paywave
+2023/8/17 20:26:13: Brand Name: Pure
+2023/8/17 20:26:13: Brand Name: qPBOC
+2023/8/17 20:26:13: Brand Name: Rupay
+2023/8/17 20:26:13: comboBox_Brand.Items.Count: 9
+2023/8/17 20:26:13: comboBox_Brand.SelectedIndex: 0
+2023/8/17 20:26:13: comboBox_Brand.SelectedItem: 
+2023/8/17 20:26:14: Error: Get Cur Brand From ComboBox Error
