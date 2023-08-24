@@ -15,12 +15,10 @@ namespace AuthHost
     public partial class MainWnd : Form
     {
         // 定义一个静态的 MainWnd 对象
-        private static MainWnd instance;
         string curDir = Application.StartupPath;
         XmlDocument doc;
         private Config config = new Config();
-        private TcpServer tcpServer = new TcpServer();
-
+        private TCPServer tcpServer;
         private enum MsgType
         {
             FINANCE_REQ_SEND = 1,
@@ -64,26 +62,22 @@ namespace AuthHost
             RC_UPLOAD_RESULT,
         };
 
-        // 定义一个静态的属性，用于获取 MainWnd 对象的实例
-        public static MainWnd Instance // 将构造函数声明为 private，以禁止在类外部创建 MainWnd 对象
-        {
-            get
-            {
-                // 如果 MainWnd 对象还没有被创建，就创建一个新的实例
-                if (instance == null)
-                {
-                    instance = new MainWnd();
-                }
-                return instance;
-            }
-        }
-
         public MainWnd()
         {
             InitializeComponent();
             Logger.Instance.SetEnabled(true);
             this.openToolStripMenuItem1.Checked = true;
-            tcpServer.OnMessage += UpdateUIWithMessage;
+            tcpServer = new TCPServer();
+            tcpServer.LogNeeded += AppendLog;
+            tcpServer.DataReceived += OnDataReceived;
+            tcpServer.ErrorOccurred += OnErrorOccurred;
+            config.LogNeeded += AppendLog;
+            this.FormClosing += MainWnd_FormClosing;
+        }
+
+        private void MainWnd_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            tcpServer?.CloseConnection();
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -428,42 +422,42 @@ namespace AuthHost
         {
             this.config.LoadXml(Config.CfgType.CfgAID, this.comboBox_AIDCfg.SelectedIndex);
             string[] files = Directory.GetFiles(this.config.AIDCfgName);
-            UpdateMessNolog("Load AID File:" + files[this.comboBox_AIDCfg.SelectedIndex]);
+            //UpdateMessNolog("Load AID File:" + files[this.comboBox_AIDCfg.SelectedIndex]);
         }
 
         private void button_CAPKDownld_Click(object sender, EventArgs e)
         {
             this.config.LoadXml(Config.CfgType.CfgCAPK, this.comboBox_CAPKCfg.SelectedIndex);
             string[] files = Directory.GetFiles(this.config.CAPKCfgName);
-            UpdateMessNolog("Load CAPK File:" + files[this.comboBox_CAPKCfg.SelectedIndex]);
+            //UpdateMessNolog("Load CAPK File:" + files[this.comboBox_CAPKCfg.SelectedIndex]);
         }
 
         private void button_ExcpFileDownld_Click(object sender, EventArgs e)
         {
             this.config.LoadXml(Config.CfgType.CfgExcpFile, this.comboBox_ExcpFileCfg.SelectedIndex);
             string[] files = Directory.GetFiles(this.config.ExcpFileCfgName);
-            UpdateMessNolog("Load Excption File:" + files[this.comboBox_ExcpFileCfg.SelectedIndex]);
+            //UpdateMessNolog("Load Excption File:" + files[this.comboBox_ExcpFileCfg.SelectedIndex]);
         }
 
         private void button_DRLDownld_Click(object sender, EventArgs e)
         {
             this.config.LoadXml(Config.CfgType.CfgDRL, this.comboBox_DRLCfg.SelectedIndex);
             string[] files = Directory.GetFiles(this.config.DRLCfgName);
-            UpdateMessNolog("Load DRL File:" + files[this.comboBox_DRLCfg.SelectedIndex]);
+            //UpdateMessNolog("Load DRL File:" + files[this.comboBox_DRLCfg.SelectedIndex]);
         }
 
         private void button_TermParmDownld_Click(object sender, EventArgs e)
         {
             this.config.LoadXml(Config.CfgType.CfgTermParm, this.comboBox_TermParmCfg.SelectedIndex);
             string[] files = Directory.GetFiles(this.config.TermParCfgName);
-            UpdateMessNolog("Load Term Param File:" + files[this.comboBox_TermParmCfg.SelectedIndex]);
+            //UpdateMessNolog("Load Term Param File:" + files[this.comboBox_TermParmCfg.SelectedIndex]);
         }
 
         private void button_RevoKeyDownld_Click(object sender, EventArgs e)
         {
             this.config.LoadXml(Config.CfgType.CfgRevokey, this.comboBox_RevoKeyCfg.SelectedIndex);
             string[] files = Directory.GetFiles(this.config.RevokeyCfgName);
-            UpdateMessNolog("Load Revokey File:" + files[this.comboBox_RevoKeyCfg.SelectedIndex]);
+            //UpdateMessNolog("Load Revokey File:" + files[this.comboBox_RevoKeyCfg.SelectedIndex]);
         }
 
         private void button_ListenTCP_Click(object sender, EventArgs e)
@@ -475,11 +469,8 @@ namespace AuthHost
                 Logger.Instance.Log("Error: cant parse TCP Port from textBox");
                 return;
             }
-            // 启动监听线程
-            Thread listeningThread = new Thread(() => tcpServer.Start(ipAddressString, port));
-            listeningThread.Start();
-            Thread handleRequestThread = new Thread(dealTermData);
-            handleRequestThread.Start();
+
+            tcpServer.Listen(ipAddressString, port);
 
             // 禁用按钮，防止多次点击
             button_ListenTCP.Enabled = false;
@@ -488,141 +479,59 @@ namespace AuthHost
 
         private void button_CloseTCP_Click(object sender, EventArgs e)
         {
-            tcpServer.Stop();
+            tcpServer.ClearBuffer();
+            tcpServer.CloseConnection();
 
             // 更新按钮状态
             button_CloseTCP.Enabled = false;
             button_ListenTCP.Enabled = true;
         }
 
-        private void dealTermData()
+        public void AppendLog(string logMessage)
         {
-            //List<string> list = new List<string>();
-            string receiveData;
-            while (tcpServer.HasDataAvailable())
+            if (this.richTextBox_Message.InvokeRequired)
             {
-                //list = tcpServer.RetrieveAllReceivedData();
-                receiveData = tcpServer.RetrieveReceivedData();
-                if (parseRequestFromPOS(receiveData) == true)
-                {
-                    break;
-                }
-            }
-        }
-
-        private bool parseRequestFromPOS(string reqeust)
-        {
-            byte[] reqBCD = new byte[1024];
-            byte[] tlvs = new byte[1020];
-            bool needParseTLV = true;
-
-            Tool tool = new Tool();
-            reqBCD = tool.StringToBCD(reqeust);
-            if (reqBCD.Length == 4) //只解析请求，不用解析TLV
-            {
-                needParseTLV = false;
-            }
-
-            if (needParseTLV)
-            {
-                switch (reqBCD[1])
-                {
-                    case (byte)MsgType.FINANCE_REQ_RECV:
-                        DealFinanceRequest(tlvs); 
-                        break;
-                    case (byte)MsgType.AUTHORIZE_REQ_RECV:
-                        DealAuthorizeRequst(tlvs); 
-                        break;
-                    case (byte)MsgType.FINANCE_CONFIRM_RECV:
-                        DealFinanceConfirm(tlvs); 
-                        break;
-                    case (byte)MsgType.BATCH_UPLOAD_RECV:
-                        DealBatchUpload(tlvs);
-                        break;
-                    case (byte)MsgType.TRANS_RESULT_RECV:
-                        DealTransResult(tlvs);
-                        break;
-                    case (byte)MsgType.TERM_OUTCOME_RECV:
-                        DealTermOutcome(tlvs);
-                        break;
-                    default:
-                        return false;
-                }
-
+                richTextBox_Message.Invoke(new Action<string>(AppendLog), logMessage);
             }
             else
             {
-                switch (reqBCD[1])
-                {
-                    case (byte)MsgType.AID_DOWNLOAD_RECV:
-                        DownloadAID();
-                        break;
-                    case (byte)MsgType.CAPK_DOWNLOAD_RECV:
-                        DownloadCAPK();
-                        break;
-                    case (byte)MsgType.DRL_DOWNLOAD_RECV:
-                        DownloadDRL();
-                        break;
-                    case (byte)MsgType.SIMDATA_DOWNLOAD_RECV:
-                        DownloadTermParam();
-                        break;
-                    case (byte)MsgType.BLACKLIST_DOWNLOAD_RECV:
-                        DownloadBlacklist();
-                        break;
-                    case (byte)MsgType.REVOKEY_DOWNLOAD_RECV:
-                        DownloadRevokey();
-                        break;
-                    case (byte)MsgType.TRANS_REQ_RECV:
-                        StartTrans();
-                        break;
-                    default:
-                        return false;
-                }
+                this.richTextBox_Message.AppendText(logMessage + Environment.NewLine);
             }
-            return true;
-        }
-
-        private void UpdateUIWithMessage(string message)
-        {
-            this.Invoke((Action)(() =>
-            {
-                UpdateMessNolog(message);
-            }));
         }
 
         private void DownloadAID()
         {
-
+            this.config.DownloadXml(Config.CfgType.CfgAID, this.tcpServer);
         }
 
         private void DownloadCAPK()
         {
-
+            this.config.DownloadXml(Config.CfgType.CfgCAPK, this.tcpServer);
         }
 
         private void DownloadDRL()
         {
-
+            this.config.DownloadXml(Config.CfgType.CfgDRL, tcpServer);
         }
 
         private void DownloadExceptionFile()
         {
-
+            this.config.DownloadXml(Config.CfgType.CfgExcpFile, tcpServer);
         }
 
         private void DownloadTermParam()
         {
-
+            this.config.DownloadXml(Config.CfgType.CfgTermParm, tcpServer);
         }
 
         private void DownloadRevokey()
         {
-
+            this.config.DownloadXml(Config.CfgType.CfgRevokey, tcpServer);
         }
 
         private void DownloadBlacklist()
         {
-
+            this.config.DownloadXml(Config.CfgType.CfgExcpFile, tcpServer);
         }
 
         private void StartTrans()
@@ -658,6 +567,101 @@ namespace AuthHost
         private void DealFinanceConfirm(byte[] tlvs)
         {
 
+        }
+
+        private void comboBox_IPAddr_Click(object sender, EventArgs e)
+        {
+            string hostName = Dns.GetHostName();
+            IPHostEntry hostEntry = Dns.GetHostEntry(hostName);
+            List<string> IPAddrList = new List<string>();
+            foreach (IPAddress ip in hostEntry.AddressList)
+            {
+                if (ip.AddressFamily == AddressFamily.InterNetwork)  // IPv4地址
+                {
+                    Logger.Instance.Log(ip.ToString());
+                    IPAddrList.Add(ip.ToString());
+                }
+            }
+            UpdateIPAddrList(IPAddrList);
+            this.comboBox_IPAddr.SelectedIndex = 0;
+        }
+
+        private void OnDataReceived(object sender, byte[] data)
+        {
+            string receivedData = Tool.ByteArrayToBcdString(data);
+            bool needParseTLV = true;
+
+            AppendLog("Recv TCP Data: "+ receivedData);
+
+            if(data.Length == 4)
+            {
+                needParseTLV = false;
+            }
+
+            if (needParseTLV)
+            {
+                byte[] tlvs = new byte[data.Length-4];
+                Array.Copy(data, 4, tlvs, 0, tlvs.Length);
+                switch (data[1])
+                {
+                    case (byte)MsgType.FINANCE_REQ_RECV:
+                        DealFinanceRequest(tlvs);
+                        break;
+                    case (byte)MsgType.AUTHORIZE_REQ_RECV:
+                        DealAuthorizeRequst(tlvs);
+                        break;
+                    case (byte)MsgType.FINANCE_CONFIRM_RECV:
+                        DealFinanceConfirm(tlvs);
+                        break;
+                    case (byte)MsgType.BATCH_UPLOAD_RECV:
+                        DealBatchUpload(tlvs);
+                        break;
+                    case (byte)MsgType.TRANS_RESULT_RECV:
+                        DealTransResult(tlvs);
+                        break;
+                    case (byte)MsgType.TERM_OUTCOME_RECV:
+                        DealTermOutcome(tlvs);
+                        break;
+                    case (byte)MsgType.SIMDATA_DOWNLOAD_RECV:
+                        DownloadTermParam();
+                        break;
+
+                    default:
+                        return ;
+                }
+            }
+            else
+            {
+                switch (data[1])
+                {
+                    case (byte)MsgType.AID_DOWNLOAD_RECV:
+                        DownloadAID();
+                        break;
+                    case (byte)MsgType.CAPK_DOWNLOAD_RECV:
+                        DownloadCAPK();
+                        break;
+                    case (byte)MsgType.DRL_DOWNLOAD_RECV:
+                        DownloadDRL();
+                        break;
+                    case (byte)MsgType.BLACKLIST_DOWNLOAD_RECV:
+                        DownloadBlacklist();
+                        break;
+                    case (byte)MsgType.REVOKEY_DOWNLOAD_RECV:
+                        DownloadRevokey();
+                        break;
+                    case (byte)MsgType.TRANS_REQ_RECV:
+                        StartTrans();
+                        break;
+                    default:
+                        return ;
+                }
+            }
+        }
+
+        // Event handler for error occurred
+        private void OnErrorOccurred(object sender, string errorMessage)
+        {
+            AppendLog(errorMessage);
         }
     }
 }

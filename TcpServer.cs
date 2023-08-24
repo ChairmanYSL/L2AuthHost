@@ -1,103 +1,98 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Sockets;
+﻿using AuthHost;
+using System;
 using System.Net;
+using System.Net.Sockets;
 using System.Text;
-using System.Threading.Tasks;
-using System.Collections.Concurrent;
 
-namespace AuthHost
+public class TCPServer
 {
-    public class TcpServer
+    private TcpListener _server;
+    private TcpClient _clientSocket;
+    private NetworkStream _networkStream;
+
+    public event EventHandler<byte[]> DataReceived;
+    public event EventHandler<string> ErrorOccurred;
+    public delegate void LogDelegate(string message);
+    public event LogDelegate LogNeeded;
+
+
+    public TCPServer()
     {
-        private TcpListener listener;
-        private TcpClient client;
-        private bool continueListening = true;
+        _clientSocket = null;
+    }
 
-        public event Action<string> OnMessage; // 事件，用于向外部发送消息
-        private readonly Queue<string> receivedDataQueue = new Queue<string>();  // 用队列存储接收到的数据
-        public void Start(string ipAddressString, int port)
+    public void Listen(string hostAddress, int port)
+    {
+        _server = new TcpListener(IPAddress.Parse(hostAddress), port);
+        _server.Start();
+        LogNeeded.Invoke($"TCP server listening on {hostAddress} port {port}");
+
+        _server.BeginAcceptTcpClient(new AsyncCallback(HandleNewConnection), null);
+    }
+
+    public int SendData(byte[] data)
+    {
+        if (_networkStream != null)
         {
-            IPAddress localAddr;
-            if (!IPAddress.TryParse(ipAddressString, out localAddr))
-            {
-                OnMessage?.Invoke("Invalid IP Address!");
-                return;
-            }
-
-            listener = new TcpListener(localAddr, port);
-            listener.Start();
-
-            OnMessage?.Invoke($"Listening on {localAddr}:{port}...");
-
-            while (continueListening)
-            {
-                client = listener.AcceptTcpClient();
-                OnMessage?.Invoke("Client connected!");
-                HandleClient(client);
-            }
+            _networkStream.Write(data, 0, data.Length);
+            return data.Length;
         }
+        return 0;
+    }
 
-        public void Stop()
+    public void CloseConnection()
+    {
+        _networkStream?.Close();
+        _clientSocket?.Close();
+
+        _networkStream = null;
+        _clientSocket = null;
+    }
+
+    private void HandleNewConnection(IAsyncResult result)
+    {
+        _clientSocket = _server.EndAcceptTcpClient(result);
+        LogNeeded.Invoke("Client connected: "+ _clientSocket);
+        _networkStream = _clientSocket.GetStream();
+        _networkStream.BeginRead(new byte[] { 0 }, 0, 0, HandleReadyRead, null);
+    }
+
+    private void HandleReadyRead(IAsyncResult result)
+    {
+        try
         {
-            continueListening = false;
-            client?.Close();
-            listener?.Stop();
-        }
-        public void SendData(string data)
-        {
-            if (client != null && client.Connected)
-            {
-                Tool tool = new Tool();
-                byte[] bytesToSend = tool.StringToBCD(data);
-                client.GetStream().Write(bytesToSend, 0, bytesToSend.Length);
-                OnMessage?.Invoke($"Sent: {data}");
-            }
-            else
-            {
-                OnMessage?.Invoke("No client connected or connection lost.");
-            }
-        }
+            byte[] data = new byte[_clientSocket.ReceiveBufferSize];
+            int bytesRead = _networkStream.Read(data, 0, data.Length);
+            LogNeeded.Invoke("Read TCP Data Len: " + bytesRead);
+            Array.Resize(ref data, bytesRead);  //Resize the array to match the actual data length
+            LogNeeded.Invoke("Read TCP Data: " + Tool.ByteArrayToBcdString(data));
+            DataReceived?.Invoke(this, data);
 
-        // 提供的外部方法，检查是否有数据可读
-        public bool HasDataAvailable()
-        {
-            return receivedDataQueue.Count > 0;
+            _networkStream.BeginRead(new byte[] { 0 }, 0, 0, HandleReadyRead, null);
         }
-
-        public string RetrieveReceivedData()
+        catch (Exception ex)
         {
-            if (receivedDataQueue.Count > 0)
-            {
-                return receivedDataQueue.Dequeue();
-            }
-            else
-            {
-                return null; // 如果队列为空，返回null
-            }
+            ErrorOccurred?.Invoke(this, ex.Message);
+            Console.WriteLine($"TCP error occurred: {ex.Message}");
         }
+    }
 
-        // 提供的外部方法，用于一次性读取所有数据并清空队列
-        public List<string> RetrieveAllReceivedData()
+    public void ClearBuffer()
+    {
+        byte[] buffer = new byte[_clientSocket.ReceiveBufferSize];
+        while (_networkStream.DataAvailable)
         {
-            List<string> allData = new List<string>(receivedDataQueue);
-            receivedDataQueue.Clear();  // 清空队列
-            return allData;
+            _networkStream.Read(buffer, 0, buffer.Length);
         }
+    }
 
-        private void HandleClient(TcpClient client)
-        {
-            using (var stream = client.GetStream())
-            {
-                byte[] buffer = new byte[1024];
-                int bytesRead = stream.Read(buffer, 0, buffer.Length);
-                string dataReceived = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-                receivedDataQueue.Enqueue(dataReceived); // 将数据加入队列
+    public bool IsServerListening()
+    {
+        return _server.Pending();
+    }
 
-                OnMessage?.Invoke($"Received: {dataReceived}");
-            }
-            //client.Close();
-        }
+    public bool IsSocketOpen()
+    {
+        return _clientSocket?.Connected ?? false;
     }
 }

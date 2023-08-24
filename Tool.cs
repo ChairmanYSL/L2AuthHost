@@ -8,7 +8,7 @@ namespace AuthHost
 {
     class Tool
     {
-        public byte[] StringToBCD(string s)
+        public static byte[] StringToBCD(string s)
         {
             if (s.Length % 2 != 0)
             {
@@ -28,7 +28,7 @@ namespace AuthHost
             return output;
         }
 
-        public string BCDToString(byte[] bcd)
+        public static string BCDToString(byte[] bcd)
         {
             StringBuilder sb = new StringBuilder(bcd.Length * 2);
             foreach (byte b in bcd)
@@ -36,6 +36,11 @@ namespace AuthHost
                 sb.AppendFormat("{0:X2}", b);
             }
             return sb.ToString();
+        }
+
+        public static string ByteArrayToBcdString(byte[] data)
+        {
+            return BitConverter.ToString(data).Replace("-", "");
         }
     }
 }

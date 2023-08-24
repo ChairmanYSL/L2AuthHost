@@ -29,6 +29,7 @@ namespace AuthHost
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainWnd));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.logToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.logFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -686,6 +687,7 @@ namespace AuthHost
             this.comboBox_IPAddr.Name = "comboBox_IPAddr";
             this.comboBox_IPAddr.Size = new System.Drawing.Size(121, 20);
             this.comboBox_IPAddr.TabIndex = 2;
+            this.comboBox_IPAddr.Click += new System.EventHandler(this.comboBox_IPAddr_Click);
             // 
             // label4
             // 
@@ -723,6 +725,7 @@ namespace AuthHost
             this.Controls.Add(this.groupBox_Amount);
             this.Controls.Add(this.groupBox_Brand);
             this.Controls.Add(this.menuStrip1);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "MainWnd";
             this.Text = "AuthHost product by bruce";

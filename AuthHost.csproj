@@ -71,6 +71,9 @@
     <ErrorReport>prompt</ErrorReport>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Checkmat2.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -96,6 +99,7 @@
     </Compile>
     <Compile Include="MainProgram.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TCPServer.cs" />
     <Compile Include="TLVObject.cs" />
     <Compile Include="Tool.cs" />
     <EmbeddedResource Include="MainWnd.resx">
@@ -122,6 +126,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Checkmat2.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
