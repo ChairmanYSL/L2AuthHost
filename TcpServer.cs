@@ -21,8 +21,32 @@ public class TCPServer
         _clientSocket = null;
     }
 
+    ~TCPServer()
+    {
+        Dispose(false);
+    }
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            // Dispose managed resources
+            _networkStream?.Dispose();
+            _clientSocket?.Close();
+            _server?.Stop();
+        }
+        // Dispose unmanaged resources if any
+    }
+
     public void Listen(string hostAddress, int port)
     {
+        Stop();  // 确保在开始新的监听前停止之前的监听
         _server = new TcpListener(IPAddress.Parse(hostAddress), port);
         _server.Start();
         LogNeeded.Invoke($"TCP server listening on {hostAddress} port {port}");
@@ -95,4 +119,11 @@ public class TCPServer
     {
         return _clientSocket?.Connected ?? false;
     }
+
+    public void Stop()
+    {
+        CloseConnection();  // 关闭客户端连接
+        _server?.Stop();  // 停止 TcpListener
+    }
+
 }

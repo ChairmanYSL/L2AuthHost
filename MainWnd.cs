@@ -9,6 +9,7 @@ using System.Security.Cryptography;
 using System.IO;
 using System.Threading;
 using System.Text;
+using System.Linq;
 
 namespace AuthHost
 {
@@ -479,8 +480,8 @@ namespace AuthHost
 
         private void button_CloseTCP_Click(object sender, EventArgs e)
         {
-            tcpServer.ClearBuffer();
-            tcpServer.CloseConnection();
+            tcpServer.Stop();
+            tcpServer.Dispose();
 
             // 更新按钮状态
             button_CloseTCP.Enabled = false;
@@ -536,26 +537,909 @@ namespace AuthHost
 
         private void StartTrans()
         {
+            string transAmt = this.textBox_Amt.Text;
+            string transAmtOth = this.textBox_AmtOth.Text;
+            string transType = this.textBox_TransType.Text;
+            int tmpLen;
 
+            if(transAmt == null)
+            {
+                AlertHelper.ShowAlert("Warning", "Trans Amount 9F02 is null");
+                return;
+            }
+            else if(transAmtOth == null)
+            {
+                AlertHelper.ShowAlert("Warning", "Trans Amount Other 9F03 is null");
+                return;
+            }
+            else if(transType == null)
+            {
+                AlertHelper.ShowAlert("Warning", "Trans Type 9C is null");
+                return;
+            }
+
+            if(this.checkBox_AmtPres.Checked)
+            {
+                transAmt = transAmt.Replace(".", "");
+                if (transAmt.Length < 12)
+                {
+                    tmpLen = transAmt.Length;
+                    for (int i = 0; i < tmpLen; i++)
+                    {
+                        transAmt = transAmt.Insert(0, "0");
+                    }
+                }
+                AppendLog("Current Trans Amount 9F02:" + transAmt);
+
+            }
+
+            if(this.checkBox_AmtOthPres.Checked)
+            {
+                transAmtOth = transAmtOth.Replace(".", "");
+                if (transAmtOth.Length < 12)
+                {
+                    tmpLen = transAmtOth.Length;
+                    for (int i = 0; i < tmpLen; i++)
+                    {
+                        transAmtOth = transAmtOth.Insert(0, "0");
+                    }
+                }
+                AppendLog("Current Trans Amount Other 9F03:" + transAmtOth);
+
+            }
+
+            if(this.checkBox_TransTypePres.Checked)
+            {
+                AppendLog("Current Trans Type 9C:" + transType);
+            }
+
+            byte[] sendData = new byte[25];
+            byte[] bcdCode;
+            int sendLen=0;
+
+            sendData[0] = 0x02;
+            sendData[1] = 0x80;
+            sendData[2] = 0x00;
+
+            sendLen += 4;
+
+            if(this.checkBox_AmtPres.Checked)
+            {
+                byte[] tmp = new byte[]{0x9F,0x02,0x06};
+                Array.Copy(tmp,0,sendData,sendLen,tmp.Length);
+                sendLen += tmp.Length;
+                bcdCode = Tool.StringToBCD(transAmt);
+                Array.Copy(bcdCode, 0, sendData, sendLen, bcdCode.Length);
+                sendLen += bcdCode.Length;
+            }
+
+            if( this.checkBox_AmtOthPres.Checked)
+            {
+                byte[] tmp = new byte[] { 0x9F, 0X03, 0x06 };
+                Array.Copy(tmp, 0, sendData, sendLen, tmp.Length);
+                sendLen += tmp.Length;
+                bcdCode = Tool.StringToBCD(transAmtOth);
+                Array.Copy(bcdCode,0, sendData, sendLen,bcdCode.Length);
+                sendLen += bcdCode.Length;
+            }
+
+            if(this.checkBox_TransTypePres.Checked)
+            {
+                byte[] tmp = new byte[] { 0x9C, 0x01 };
+                Array.Copy(tmp, 0, sendData, sendLen, tmp.Length);
+                sendLen += tmp.Length;
+                bcdCode = Tool.StringToBCD(transType);
+                Array.Copy(bcdCode, 0, sendData, sendLen, bcdCode.Length);
+                sendLen += bcdCode.Length;
+            }
+            
+            this.tcpServer.SendData(sendData);
         }
 
         private void DealFinanceRequest(byte[] tlvs)
         {
+            int index;
 
+            if ( (index = Array.IndexOf(tlvs, (byte)0x99)) >= 0)
+            {
+                byte[] tmp = new byte[tlvs[index+1]];
+                Array.Copy(tlvs, index + 2, tmp, 0, tmp.Length);
+                AppendLog("Online Encrypted PIN:" + Tool.HexByteArrayToString(tmp));
+            }
+
+            if(this.comboBox_Brand.SelectedItem.ToString() == "ExpressPay")
+            {
+                if((index = Array.IndexOf(tlvs, (byte)0x56)) >= 0)
+                {
+                    byte[] tmp = new byte[tlvs[index + 1]];
+                    Array.Copy(tlvs, index + 2, tmp, 0, tmp.Length);
+                    AppendLog("Track 1 Data:"+Tool.HexByteArrayToString(tmp));
+                }
+                if(TLVObject.ContainsSequence(tlvs,(byte)0x9F, (byte)0x5B))
+                {
+                    byte[] tmp = TLVObject.GetTLVValue(tlvs, (byte)0x9F, (byte)0x6B);
+                    AppendLog("Track 2 Equivalent Data:" + Tool.HexByteArrayToString(tmp));
+                }
+            }
+
+            string respCode = this.textBox_ISRespCode.Text;
+            string authData = this.textBox_ISAuthData.Text;
+            string script = this.textBox_ISScript.Text;
+            byte high, low;
+            string sendData = "";
+            int len;
+
+            if(respCode != null)
+            {
+                sendData += "8A02";
+                sendData += respCode;
+                AppendLog("Current Response Code 8A:" + respCode);
+            }
+            if(authData != null)
+            {
+                sendData += "91";
+                len = authData.Length / 2;
+                sendData += len.ToString("X2");
+                sendData += authData;
+                AppendLog("Current Authorization Response Code 91:" + authData);
+            }
+            if(script != null)
+            {
+                sendData += "71";
+                len = script.Length / 2;
+                sendData += len.ToString("X2");
+                sendData += script;
+                AppendLog("Current Script 71:" + script);
+            }
+
+            if(sendData.Length > 0)
+            {
+                high = (byte)(sendData.Length / 2 / 256);
+                low = (byte)(sendData.Length / 2 % 256);
+                sendData = "02" + "01" + high.ToString("X2") + low.ToString("X2") + sendData;
+                this.tcpServer.SendData(Tool.StringToHexByteArray(sendData));
+            }
         }
 
         private void DealAuthorizeRequst(byte[] tlvs)
         {
+            int index;
 
+            if ((index = Array.IndexOf(tlvs, (byte)0x99)) >= 0)
+            {
+                byte[] tmp = new byte[tlvs[index + 1]];
+                Array.Copy(tlvs, index + 2, tmp, 0, tmp.Length);
+                AppendLog("Online Encrypted PIN:" + Tool.HexByteArrayToString(tmp));
+            }
+
+            if (this.comboBox_Brand.SelectedItem.ToString() == "ExpressPay")
+            {
+                if ((index = Array.IndexOf(tlvs, (byte)0x56)) >= 0)
+                {
+                    byte[] tmp = new byte[tlvs[index + 1]];
+                    Array.Copy(tlvs, index + 2, tmp, 0, tmp.Length);
+                    AppendLog("Track 1 Data:" + Tool.HexByteArrayToString(tmp));
+                }
+                if (TLVObject.ContainsSequence(tlvs, (byte)0x9F, (byte)0x5B))
+                {
+                    byte[] tmp = TLVObject.GetTLVValue(tlvs, (byte)0x9F, (byte)0x6B);
+                    AppendLog("Track 2 Equivalent Data:" + Tool.HexByteArrayToString(tmp));
+                }
+            }
+
+            string respCode = this.textBox_ISRespCode.Text;
+            string authData = this.textBox_ISAuthData.Text;
+            string script = this.textBox_ISScript.Text;
+            byte high, low;
+            string sendData = "";
+            int len;
+
+            if (respCode != null)
+            {
+                sendData += "8A02";
+                sendData += respCode;
+                AppendLog("Current Response Code 8A:" + respCode);
+            }
+            if (authData != null)
+            {
+                sendData += "91";
+                len = authData.Length / 2;
+                sendData += len.ToString("X2");
+                sendData += authData;
+                AppendLog("Current Authorization Response Code 91:" + authData);
+            }
+            if (script != null)
+            {
+                sendData += "71";
+                len = script.Length / 2;
+                sendData += len.ToString("X2");
+                sendData += script;
+                AppendLog("Current Script 71:" + script);
+            }
+
+            if (sendData.Length > 0)
+            {
+                high = (byte)(sendData.Length / 2 / 256);
+                low = (byte)(sendData.Length / 2 % 256);
+                sendData = "02" + "02" + high.ToString("X2") + low.ToString("X2") + sendData;
+                this.tcpServer.SendData(Tool.StringToHexByteArray(sendData));
+            }
         }
 
         private void DealBatchUpload(byte[] tlvs)
         {
+            TLVObject tLVObject = new TLVObject();
+            AppendLog("Batch Up Record:");
+            if (tLVObject.parse_tlvBCD(tlvs, tlvs.Length))
+            {
+                foreach(KeyValuePair<string, string> kvp in tLVObject.tlvDic)
+                {
+                    AppendLog(kvp.Key +": " + kvp.Value);
+                }
+            }
+            else
+            {
+                AppendLog("Parse TLV Data Error");
+            }
+            
+        }
 
+        private void ShowTransResult(string result)
+        {
+            string cardBrand = this.comboBox_Brand.SelectedItem.ToString();
+            //TODO:完善其他卡组的交易结果处理
+            switch(cardBrand)
+            {
+                case "Discover":
+                    if(result == "61")
+                    {
+                        AppendLog("TransResult:  Offline Approved");
+                    }
+                    else if(result == "62")
+                    {
+                        AppendLog("TransResult:  Offline Declined");
+                    }
+                    else if(result == "63")
+                    {
+
+                    }
+                    break;
+                default:
+                    break;
+            }   
+        }
+
+        private void ShowTransOutcome(string cardBrand, string outcome)
+        {
+            string tmp = "";
+            tmp = outcome.Substring(0, 2);
+            AppendLog("TransOutcome: ");
+
+            if(tmp == "10")
+            {
+                AppendLog("Status:  Approved");
+            }
+            else if(tmp == "20")
+            {
+                AppendLog("Status:  Declined");
+            }
+            else if(tmp == "30")
+            {
+                AppendLog("Status:  Online Request");
+            }
+            else if(tmp == "40")
+            {
+                AppendLog("Status:  End Application");
+            }
+            else if(tmp == "50")
+            {
+                AppendLog("Status:  Select Next");
+            }
+            else if(tmp == "60")
+            {
+                AppendLog("Status:  Try Another Interface");
+            }
+            else if(tmp == "70")
+            {
+                AppendLog("Status:  Try Again");
+            }
+            else if(tmp == "A0")
+            {
+                AppendLog("Status:  End Application (with restart – communication error)");
+            }
+            else if(tmp == "B0")
+            {
+                AppendLog("Status:  End Application (with restart - On-Device CVM)");
+            }
+            else if(tmp == "C0")
+            {
+                AppendLog("Status:  Online Request (Two Presentments)");
+            }
+            else if(tmp == "D0")
+            {
+                AppendLog("Status:  Online Request (Present and Hold)");
+            }
+            else if(tmp == "F0")
+            {
+                AppendLog("Status:  Online Request (No Additional Tap)");
+            }
+            else if(tmp == "FF")
+            {
+                AppendLog("Status:  N/A");
+            }
+            else
+            {
+                AppendLog("Status:  Invalid Data");
+            }
+
+            tmp = outcome.Substring(2, 2);
+            if(tmp == "00")
+            {
+                AppendLog("Start:  A");
+            }
+            else if(tmp == "10")
+            {
+                AppendLog("Start:  B");
+            }
+            else if(tmp == "20")
+            {
+                AppendLog("Start:  C");
+            }
+            else if (tmp == "30")
+            {
+                AppendLog("Start:  D");
+            }
+            else if (tmp == "F0")
+            {
+                AppendLog("Start:  N/A");
+            }
+            else
+            {
+                AppendLog("Start:  Invalid Data");
+            }
+            //TODO:完善交易结果的outcome处理
+
+        }
+
+        private void ShowTransOutcome(string outcome)
+        {
+            string tmp = "";
+            tmp = outcome.Substring(0, 2);
+            AppendLog("TransOutcome: ");
+            //Status
+            if (tmp == "10")
+            {
+                AppendLog("Status:  Approved");
+            }
+            else if (tmp == "20")
+            {
+                AppendLog("Status:  Declined");
+            }
+            else if (tmp == "30")
+            {
+                AppendLog("Status:  Online Request");
+            }
+            else if (tmp == "40")
+            {
+                AppendLog("Status:  End Application");
+            }
+            else if (tmp == "50")
+            {
+                AppendLog("Status:  Select Next");
+            }
+            else if (tmp == "60")
+            {
+                AppendLog("Status:  Try Another Interface");
+            }
+            else if (tmp == "70")
+            {
+                AppendLog("Status:  Try Again");
+            }
+            else if (tmp == "A0")
+            {
+                AppendLog("Status:  End Application (with restart – communication error)");
+            }
+            else if (tmp == "B0")
+            {
+                AppendLog("Status:  End Application (with restart - On-Device CVM)");
+            }
+            else if (tmp == "C0")
+            {
+                AppendLog("Status:  Online Request (Two Presentments)");
+            }
+            else if (tmp == "D0")
+            {
+                AppendLog("Status:  Online Request (Present and Hold)");
+            }
+            else if (tmp == "F0")
+            {
+                AppendLog("Status:  Online Request (No Additional Tap)");
+            }
+            else if (tmp == "FF")
+            {
+                AppendLog("Status:  N/A");
+            }
+            else
+            {
+                AppendLog("Status:  Invalid Data");
+            }
+            //Start
+            tmp = outcome.Substring(2, 2);
+            if (tmp == "00")
+            {
+                AppendLog("Start:  A");
+            }
+            else if (tmp == "10")
+            {
+                AppendLog("Start:  B");
+            }
+            else if (tmp == "20")
+            {
+                AppendLog("Start:  C");
+            }
+            else if (tmp == "30")
+            {
+                AppendLog("Start:  D");
+            }
+            else if (tmp == "F0")
+            {
+                AppendLog("Start:  N/A");
+            }
+            else
+            {
+                AppendLog("Start:  Invalid Data");
+            }
+            //Online Response Data
+            tmp = outcome.Substring(4, 2);
+            if (tmp == "10")
+            {
+                AppendLog("Online Response Data:  EMV Data");
+            }
+            else if (tmp == "20")
+            {
+                AppendLog("Online Response Data:  Any");
+            }
+            else if (tmp == "30")
+            {
+                AppendLog("Online Response Data:  N/A");
+            }
+            else
+            {
+                AppendLog("Online Response Data:  Invalid Data");
+            }
+            //CVM
+            tmp = outcome.Substring(6, 2);
+            if (tmp == "00")
+            {
+                AppendLog("CVM:  No CVM");
+            }
+            else if (tmp == "10")
+            {
+                AppendLog("CVM:  Obtain Signature");
+            }
+            else if (tmp == "20")
+            {
+                AppendLog("CVM:  Online PIN");
+            }
+            else if (tmp == "30")
+            {
+                AppendLog("CVM:  Confirmation Code Verified");
+            }
+            else if (tmp == "F0")
+            {
+                AppendLog("CVM:  N/A");
+            }
+            else
+            {
+                AppendLog("CVM:  Invalid Data");
+            }
+            //Flag
+            tmp = outcome.Substring(8, 2);
+            byte flag = Convert.ToByte(tmp, 16);
+            if ((flag & (0x80)) == 0x80)
+            {
+                AppendLog("UI Request on Outcome Present:yes");
+            }
+            else
+            {
+                AppendLog("UI Request on Outcome Present:no");
+            }
+            if((flag & (0x40)) == 0x40)
+            {
+                AppendLog("UI Request on Restart Present:yes");
+            }
+            else
+            {
+                AppendLog("UI Request on Restart Present:no");
+            }
+            if((flag& (0x20)) == 0x20)
+            {
+                AppendLog("Data Record Present:yes");
+            }
+            else
+            {
+                AppendLog("Data Record Present:no");
+            }
+            if((flag&(0x10)) == 0x10)
+            {
+                AppendLog("Discretionary Data Present:yes");
+            }
+            else
+            {
+                AppendLog("Discretionary Data Present:no");
+            }
+            if((flag&(0x08)) == 0x08)
+            {
+                AppendLog("Receipt:yes");
+            }
+            else
+            {
+                AppendLog("Receipt:N/A");
+            }
+            //AIP
+            tmp = outcome.Substring(10, 2);
+            if(tmp == "10")
+            {
+                AppendLog("AIP: Contant Chip");
+            }
+            else if(tmp == "F0")
+            {
+                AppendLog("AIP: N/A");
+            }
+            else
+            {
+                AppendLog("AIP: Invalid Data");
+            }
+            //Field Off Request
+            tmp = outcome.Substring(12, 2);
+            if(tmp == "FF")
+            {
+                AppendLog("Field Off Request: N/A");
+            }
+            else
+            {
+                AppendLog("Field Off Request: " + tmp);
+            }
+            //Removal Timeout:
+            tmp = outcome.Substring(14, 4);
+            AppendLog("Removal Timeout: " + tmp);
+        }
+
+        private void ShowUIRequest(string msg, bool restart) 
+        { 
+            if(restart)
+            {
+                AppendLog("UI Request On Restart:");
+            }
+            else
+            {
+                AppendLog("UI Request On Outcome:");
+            }
+            //Message Identifier
+            string tmp = "";
+            tmp = msg.Substring(0, 2);
+            if(tmp == "03")
+            {
+                AppendLog("Message Identifier:  03(Approved)");
+            }
+            else if(tmp == "07")
+            {
+                AppendLog("Message Identifier:  07(Not Authorised)");
+            }
+            else if (tmp == "09")
+            {
+                AppendLog("Message Identifier:  09(Please enter your PIN)");
+            }
+            else if (tmp == "15")
+            {
+                AppendLog("Message Identifier:  15(Present Card)");
+            }
+            else if (tmp == "16")
+            {
+                AppendLog("Message Identifier:  16(Processing)");
+            }
+            else if (tmp == "17")
+            {
+                AppendLog("Message Identifier:  17(Card Read OK)");
+            }
+            else if (tmp == "19")
+            {
+                AppendLog("Message Identifier:  19(Please Present One Card Only)");
+            }
+            else if (tmp == "1A")
+            {
+                AppendLog("Message Identifier:  1A(Approved – Please Sign)");
+            }
+            else if (tmp == "1B")
+            {
+                AppendLog("Message Identifier:  1B(Authorising, Please Wait)");
+            }
+            else if (tmp == "1C")
+            {
+                AppendLog("Message Identifier:  1C(Insert, Swipe or Try another card)");
+            }
+            else if (tmp == "1D")
+            {
+                AppendLog("Message Identifier:  1D(Please insert card)");
+            }
+            else if (tmp == "20")
+            {
+                AppendLog("Message Identifier:  20(See Phone for Instructions)");
+            }
+            else if (tmp == "21")
+            {
+                AppendLog("Message Identifier:  21(Present Card Again)");
+            }
+            else if (tmp == "FF")
+            {
+                AppendLog("Message Identifier:  N/A");
+            }
+            else
+            {
+                AppendLog("Message Identifier:  Invalid Data");
+            }
+            //Status:
+            tmp = msg.Substring(2, 2);
+            if (tmp == "00")
+            {
+                AppendLog("Status:  NOT READY\n");
+            }
+            else if (tmp == "01")
+            {
+                AppendLog("Status:  IDLE\n");
+            }
+            else if (tmp == "02")
+            {
+                AppendLog("Status:  READY TO READ\n");
+            }
+            else if (tmp == "03")
+            {
+                AppendLog("Status:  PROCESSING\n");
+            }
+            else if (tmp == "04")
+            {
+                AppendLog("Status:  CARD READ SUCCESSFULLY\n");
+            }
+            else if (tmp == "05")
+            {
+                AppendLog("Status:  PROCESSING ERROR\n");
+            }
+            else if (tmp == "FF")
+            {
+                AppendLog("Status:  N/A\n");
+            }
+            else
+            {
+                AppendLog("Status:  Invalid Data\n");
+            }
+            //Hold Time:
+            tmp = msg.Substring(4, 6);
+            try
+            {
+                AppendLog("Hold Time:" + tmp);
+            }
+            catch (ArgumentOutOfRangeException e)
+            {
+                AppendLog("Show Hold Time fail!length invalid!");
+            }
+            //Language Preference:
+            tmp = msg.Substring(10, 16);
+            try
+            {
+                AppendLog("Language Preference:" + tmp);
+            }
+            catch (ArgumentOutOfRangeException e)
+            {
+                AppendLog("Show Language Preference fail!length invalid!");
+            }
+            //Value Qualifier:
+            tmp = msg.Substring(26, 2);
+            try
+            {
+                AppendLog("Value Qualifier:" + tmp);
+            }
+            catch (ArgumentOutOfRangeException e)
+            {
+                AppendLog("Show Value Qualifier fail!length invalid!");
+            }
+            //Value
+            tmp = msg.Substring(28, 12);
+            try
+            {
+                if(tmp != "FFFFFFFFFFFF")
+                {
+                    AppendLog("Value :" + tmp);
+                }
+            }
+            catch (ArgumentOutOfRangeException e)
+            {
+                AppendLog("Show Value fail!length invalid!");
+            }
+            //Currency Code
+            tmp = msg.Substring(40, 4);
+            try
+            {
+                if (tmp != "FFFFFFFFFFFF")
+                {
+                    AppendLog("Currency Code :" + tmp);
+                }
+            }
+            catch (ArgumentOutOfRangeException e)
+            {
+                AppendLog("Show Currency Code fail!length invalid!");
+            }
+
+        }
+
+        private void ShowDataRecord(string msg)
+        {
+            TLVObject tLVObject = new TLVObject();
+            tLVObject.parse_tlvstring(msg);
+
+            foreach (KeyValuePair<string, string> kvp in tLVObject.tlvDic)
+            {
+                if(kvp.Key == "DF43")
+                {
+                    if(kvp.Value == "01")
+                    {
+                        AppendLog("Transaction Mode:  EMV Mode");
+                    }
+                    else if(kvp.Value == "02")
+                    {
+                        AppendLog("Transaction Mode:  Magstripe Mode");
+                    }
+                    else if(kvp.Value == "04")
+                    {
+                        AppendLog("Transaction Mode:  Legacy Mode");
+                    }
+                    else
+                    {
+                        AppendLog("Transaction Mode:  Invalid Data");
+                    }
+                }
+                else
+                {
+                    AppendLog(kvp.Key + ": " + kvp.Value);
+                }
+            }
         }
 
         private void DealTransResult(byte[] tlvs)
         {
+            AppendLog("Trans Result:");
+            TLVObject tLVObject = new TLVObject();
+            if(tLVObject.parse_tlvBCD(tlvs, tlvs.Length))
+            {
+                foreach (KeyValuePair<string, string> kvp in tLVObject.tlvDic)
+                {
+                    if(kvp.Key == "03")
+                    {
+                        ShowTransResult(kvp.Value);
+                    }
+                    else if(kvp.Key == "DF23")
+                    {
+                        ShowTransOutcome(kvp.Value);
+                    }
+                    else if(kvp.Key == "FF8109")
+                    {
+                        if(kvp.Value == "00")
+                        {
+                            AppendLog("CVM:  No CVM");
+                        }
+                        else if(kvp.Value == "10")
+                        {
+                            AppendLog("CVM:  Signature");
+                        }
+                        else if(kvp.Value == "20")
+                        {
+                            AppendLog("CVM:  Online PIN");
+                        }
+                        else if(kvp.Value == "30")
+                        {
+                            AppendLog("CVM:  CDCVM");
+                        }
+                        else if(kvp.Key == "40")
+                        {
+                            AppendLog("CVM:  N/A");
+                        }
+                        else
+                        {
+                            AppendLog("CVM:   Invalid data");
+                        }
+                    }
+                    else if(kvp.Key == "DF31")
+                    {
+                        AppendLog("Script Result:" + kvp.Value);
+                    }
+                    else if(kvp.Key == "DFC10B")
+                    {
+                        if(kvp.Value == "00")
+                        {
+                            AppendLog("ODA Result:   ODA not Performed");
+                        }
+                        else if(kvp.Value == "01")
+                        {
+                            AppendLog("ODA Result:   fDDA Succeed");
+                        }
+                        else if(kvp.Value == "02")
+                        {
+                            AppendLog("ODA Result:   fDDA Failed");
+                        }
+                        else if(kvp.Value == "03")
+                        {
+                            AppendLog("ODA Result:   SDA Succeed");
+                        }
+                        else if(kvp.Value == "04")
+                        {
+                            AppendLog("ODA Result:   SDA Failed");
+                        }
+                        else if(kvp.Value == "05")
+                        {
+                            AppendLog("ODA Result:   DDA Succeed");
+                        }
+                        else if(kvp.Value == "06")
+                        {
+                            AppendLog("ODA Result:   DDA Failed");
+                        }
+                        else if(kvp.Value == "07")
+                        {
+                            AppendLog("ODA Result:   CDA Succeed");
+                        }
+                        else if(kvp.Value == "08")
+                        {
+                            AppendLog("ODA Result:   CDA Failed");
+                        }
+                        else if(kvp.Value == "09")
+                        {
+                            AppendLog("ODA Result:   Online fDDA Succeed and Display");
+                        }
+                        else if(kvp.Value == "0A")
+                        {
+                            AppendLog("ODA Result:   Online fDDA Failed and Display");
+                        }
+                        else if(kvp.Value == "0B")
+                        {
+                            AppendLog("ODA Result:   Online SDA Succeed and Display");
+                        }
+                        else if(kvp.Value == "0C")
+                        {
+                            AppendLog("ODA Result:   Online SDA Failed and Display");
+                        }
+                        else if(kvp.Value == "0D")
+                        {
+                            AppendLog("ODA Result:   Online ODA Failed and Display");
+                        }
+                        else
+                        {
+                            AppendLog("ODA Result:   Invalid Data");
+                        }
+                    }
+                    else if(kvp.Key == "DF8129")
+                    {
+                        ShowTransOutcome(kvp.Value);
+                    }
+                    else if(kvp.Key == "DF8116")
+                    {
+                        ShowUIRequest(kvp.Value, false);
+                    }
+                    else if(kvp.Key == "DF8117")
+                    {
+                        ShowUIRequest(kvp.Value, true);
+                    }
+                    else if(kvp.Key == "FF8105")
+                    {
+                        ShowDataRecord(kvp.Value);
+                    }
+                    else
+                    {
+                        AppendLog(kvp.Key + ": " + kvp.Value);
+                    }
+                }
+            }
+            else
+            {
+                AppendLog("Parse TLV Data Error");
+            }
 
         }
 
@@ -625,7 +1509,6 @@ namespace AuthHost
                     case (byte)MsgType.SIMDATA_DOWNLOAD_RECV:
                         DownloadTermParam();
                         break;
-
                     default:
                         return ;
                 }
