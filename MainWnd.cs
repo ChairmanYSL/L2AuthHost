@@ -117,7 +117,10 @@ namespace AuthHost
                 portList.Add(port);
             }
             UpdateSerialPortList(portList);
-            this.comboBox_SerialPort.SelectedIndex = 0;
+            if(this.comboBox_SerialPort.Items.Count > 0)
+            {
+                this.comboBox_SerialPort.SelectedIndex = 0;
+            }
         }
 
         private void LoadTransParam()
@@ -1445,7 +1448,32 @@ namespace AuthHost
 
         private void DealTermOutcome(byte[] tlvs)
         {
-
+            //AppendLog("Start DealTermOutcome");
+            string s = Tool.HexByteArrayToString(tlvs);
+            //AppendLog("After HexByteArrayToString s:"+s);
+            TLVObject tLVObject = new TLVObject();
+            //AppendLog("Parse TLV result:" + tLVObject.parse_tlvstring(s));
+            if (tLVObject.parse_tlvstring(s))
+            {
+                if(tLVObject.Exist("DF8129"))
+                {
+                    AppendLog("________________________________________________");
+                    ShowTransOutcome(tLVObject.Get("DF8129"));
+                    AppendLog("________________________________________________");
+                }
+                if (tLVObject.Exist("DF8116"))
+                {
+                    AppendLog("________________________________________________");
+                    ShowUIRequest(tLVObject.Get("DF8116"), false);
+                    AppendLog("________________________________________________");
+                }
+                if (tLVObject.Exist("DF8117"))
+                {
+                    AppendLog("________________________________________________");
+                    ShowUIRequest(tLVObject.Get("DF8117"), true);
+                    AppendLog("________________________________________________");
+                }
+            }
         }
 
         private void DealFinanceConfirm(byte[] tlvs)

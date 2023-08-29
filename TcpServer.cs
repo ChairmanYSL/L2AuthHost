@@ -75,11 +75,30 @@ public class TCPServer
 
     private void HandleNewConnection(IAsyncResult result)
     {
-        _clientSocket = _server.EndAcceptTcpClient(result);
-        LogNeeded.Invoke("Client connected: "+ _clientSocket);
-        _networkStream = _clientSocket.GetStream();
-        _networkStream.BeginRead(new byte[] { 0 }, 0, 0, HandleReadyRead, null);
+        try
+        {
+            if (_server == null || !_server.Server.IsBound)
+            {
+                return;
+            }
+
+            _clientSocket = _server.EndAcceptTcpClient(result);
+            LogNeeded.Invoke("Client connected: ");
+
+            _networkStream = _clientSocket.GetStream();
+
+            byte[] buffer = new byte[_clientSocket.ReceiveBufferSize];
+            _networkStream.BeginRead(buffer, 0, buffer.Length, HandleReadyRead, null);
+
+            _server.BeginAcceptTcpClient(new AsyncCallback(HandleNewConnection), null);
+        }
+        catch (Exception ex)
+        {
+            ErrorOccurred?.Invoke(this, ex.Message);
+            LogNeeded.Invoke($"Error in HandleNewConnection: {ex.Message}");
+        }
     }
+
 
     private void HandleReadyRead(IAsyncResult result)
     {
@@ -87,9 +106,9 @@ public class TCPServer
         {
             byte[] data = new byte[_clientSocket.ReceiveBufferSize];
             int bytesRead = _networkStream.Read(data, 0, data.Length);
-            LogNeeded.Invoke("Read TCP Data Len: " + bytesRead);
+            //LogNeeded.Invoke("Read TCP Data Len: " + bytesRead);
             Array.Resize(ref data, bytesRead);  //Resize the array to match the actual data length
-            LogNeeded.Invoke("Read TCP Data: " + Tool.ByteArrayToBcdString(data));
+            //LogNeeded.Invoke("Read TCP Data: " + Tool.ByteArrayToBcdString(data));
             DataReceived?.Invoke(this, data);
 
             _networkStream.BeginRead(new byte[] { 0 }, 0, 0, HandleReadyRead, null);
