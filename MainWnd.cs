@@ -10,6 +10,7 @@ using System.IO;
 using System.Threading;
 using System.Text;
 using System.Linq;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace AuthHost
 {
@@ -20,6 +21,7 @@ namespace AuthHost
         XmlDocument doc;
         private Config config = new Config();
         private TCPServer tcpServer;
+        private SerialCom serialPort;
         private enum MsgType
         {
             FINANCE_REQ_SEND = 1,
@@ -74,11 +76,16 @@ namespace AuthHost
             tcpServer.ErrorOccurred += OnErrorOccurred;
             config.LogNeeded += AppendLog;
             this.FormClosing += MainWnd_FormClosing;
+            serialPort = new SerialCom();
+            serialPort.LogNeeded += AppendLog;
+            serialPort.DataReceived += OnDataReceived;
         }
 
         private void MainWnd_FormClosing(object sender, FormClosingEventArgs e)
         {
             tcpServer?.CloseConnection();
+            serialPort?.ClosePort();
+            serialPort?.Dispose();
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -129,6 +136,8 @@ namespace AuthHost
             this.textBox_AmtOth.Text = "0.00";
             this.textBox_TransType.Text = "00";
             this.textBox_ISRespCode.Text = "00";
+            this.textBox_CurrencyCode.Text = "0978";
+            this.textBox_CurrencyExp.Text = "2";
         }
 
         private void LoadConfigList()
@@ -220,7 +229,7 @@ namespace AuthHost
             };
 
             UpdateBaud(BaudRate);
-            this.comboBox_SerialBaud.SelectedIndex = 0;
+            this.comboBox_SerialBaud.SelectedIndex = 9;
         }
 
         public void UpdateBaud(List<string> baudList)
@@ -479,16 +488,23 @@ namespace AuthHost
             // 禁用按钮，防止多次点击
             button_ListenTCP.Enabled = false;
             button_CloseTCP.Enabled = true;
+            //选择用TCP作为交互信道时，禁用串口相关按钮
+            button_OpenSerial.Enabled = false;
+            button_ScanSerial.Enabled = false;
         }
 
         private void button_CloseTCP_Click(object sender, EventArgs e)
         {
             tcpServer.Stop();
             tcpServer.Dispose();
+            serialPort.ClosePort();
 
             // 更新按钮状态
             button_CloseTCP.Enabled = false;
             button_ListenTCP.Enabled = true;
+            //恢复串口相关按钮
+            button_ScanSerial.Enabled = true;
+            button_OpenSerial.Enabled = true;
         }
 
         public void AppendLog(string logMessage)
@@ -543,6 +559,8 @@ namespace AuthHost
             string transAmt = this.textBox_Amt.Text;
             string transAmtOth = this.textBox_AmtOth.Text;
             string transType = this.textBox_TransType.Text;
+            string currencyCode = this.textBox_CurrencyCode.Text;
+            string currencyExp = this.textBox_CurrencyExp.Text;
             int tmpLen;
 
             if(transAmt == null)
@@ -558,6 +576,16 @@ namespace AuthHost
             else if(transType == null)
             {
                 AlertHelper.ShowAlert("Warning", "Trans Type 9C is null");
+                return;
+            }
+            else if(currencyCode == null)
+            {
+                AlertHelper.ShowAlert("Warning", "Currency Code 5F2A is null");
+                return;
+            }
+            else if(currencyExp == null)
+            {
+                AlertHelper.ShowAlert("Warning", "Currency Exp 5F36 is null");
                 return;
             }
 
@@ -635,7 +663,28 @@ namespace AuthHost
                 Array.Copy(bcdCode, 0, sendData, sendLen, bcdCode.Length);
                 sendLen += bcdCode.Length;
             }
-            
+
+            //if(this.textBox_CurrencyCode.Text != "")
+            //{
+            //    byte[] tmp = new byte[] { 0x5F, 0x2A, 0x02 };
+            //    Array.Copy(tmp, 0, sendData, sendLen, tmp.Length);
+            //    sendLen += tmp.Length;
+            //    bcdCode = Tool.StringToBCD(currencyCode);
+            //    Array.Copy(bcdCode, 0, sendData, sendLen, bcdCode.Length);
+            //    sendLen += bcdCode.Length;
+            //}
+
+            //if(this.textBox_CurrencyExp.Text != "")
+            //{
+            //    byte[] tmp = new byte[] { 0x5F, 0x36, 0x01 };
+            //    Array.Copy(tmp, 0, sendData, sendLen, tmp.Length);
+            //    sendLen += tmp.Length;
+            //    bcdCode = Tool.StringToBCD(currencyExp);
+            //    Array.Copy(bcdCode, 0, sendData, sendLen, bcdCode.Length);
+            //    sendLen += bcdCode.Length;
+            //}
+
+            sendData[3] = (byte)sendLen;
             this.tcpServer.SendData(sendData);
         }
 
@@ -1095,17 +1144,32 @@ namespace AuthHost
             }
             //Field Off Request
             tmp = outcome.Substring(12, 2);
-            if(tmp == "FF")
+            try
             {
-                AppendLog("Field Off Request: N/A");
+                if (tmp == "FF")
+                {
+                    AppendLog("Field Off Request: N/A");
+                }
+                else
+                {
+                    AppendLog("Field Off Request: " + tmp);
+                }
             }
-            else
+            catch (ArgumentOutOfRangeException e)
             {
-                AppendLog("Field Off Request: " + tmp);
+                AppendLog($"ArgumentOutOfRangeException: {e.Message}\nStackTrace: {e.StackTrace}");
             }
+
             //Removal Timeout:
             tmp = outcome.Substring(14, 4);
-            AppendLog("Removal Timeout: " + tmp);
+            try
+            {
+                AppendLog("Removal Timeout: " + tmp);
+            }
+            catch (ArgumentOutOfRangeException e)
+            {
+                AppendLog($"ArgumentOutOfRangeException: {e.Message}\nStackTrace: {e.StackTrace}");
+            }
         }
 
         private void ShowUIRequest(string msg, bool restart) 
@@ -1121,99 +1185,114 @@ namespace AuthHost
             //Message Identifier
             string tmp = "";
             tmp = msg.Substring(0, 2);
-            if(tmp == "03")
+            try
             {
-                AppendLog("Message Identifier:  03(Approved)");
+                if (tmp == "03")
+                {
+                    AppendLog("Message Identifier:  03(Approved)");
+                }
+                else if (tmp == "07")
+                {
+                    AppendLog("Message Identifier:  07(Not Authorised)");
+                }
+                else if (tmp == "09")
+                {
+                    AppendLog("Message Identifier:  09(Please enter your PIN)");
+                }
+                else if (tmp == "15")
+                {
+                    AppendLog("Message Identifier:  15(Present Card)");
+                }
+                else if (tmp == "16")
+                {
+                    AppendLog("Message Identifier:  16(Processing)");
+                }
+                else if (tmp == "17")
+                {
+                    AppendLog("Message Identifier:  17(Card Read OK)");
+                }
+                else if (tmp == "19")
+                {
+                    AppendLog("Message Identifier:  19(Please Present One Card Only)");
+                }
+                else if (tmp == "1A")
+                {
+                    AppendLog("Message Identifier:  1A(Approved – Please Sign)");
+                }
+                else if (tmp == "1B")
+                {
+                    AppendLog("Message Identifier:  1B(Authorising, Please Wait)");
+                }
+                else if (tmp == "1C")
+                {
+                    AppendLog("Message Identifier:  1C(Insert, Swipe or Try another card)");
+                }
+                else if (tmp == "1D")
+                {
+                    AppendLog("Message Identifier:  1D(Please insert card)");
+                }
+                else if (tmp == "20")
+                {
+                    AppendLog("Message Identifier:  20(See Phone for Instructions)");
+                }
+                else if (tmp == "21")
+                {
+                    AppendLog("Message Identifier:  21(Present Card Again)");
+                }
+                else if (tmp == "FF")
+                {
+                    AppendLog("Message Identifier:  N/A");
+                }
+                else
+                {
+                    AppendLog("Message Identifier:  Invalid Data");
+                }
             }
-            else if(tmp == "07")
+            catch (ArgumentOutOfRangeException e)
             {
-                AppendLog("Message Identifier:  07(Not Authorised)");
-            }
-            else if (tmp == "09")
-            {
-                AppendLog("Message Identifier:  09(Please enter your PIN)");
-            }
-            else if (tmp == "15")
-            {
-                AppendLog("Message Identifier:  15(Present Card)");
-            }
-            else if (tmp == "16")
-            {
-                AppendLog("Message Identifier:  16(Processing)");
-            }
-            else if (tmp == "17")
-            {
-                AppendLog("Message Identifier:  17(Card Read OK)");
-            }
-            else if (tmp == "19")
-            {
-                AppendLog("Message Identifier:  19(Please Present One Card Only)");
-            }
-            else if (tmp == "1A")
-            {
-                AppendLog("Message Identifier:  1A(Approved – Please Sign)");
-            }
-            else if (tmp == "1B")
-            {
-                AppendLog("Message Identifier:  1B(Authorising, Please Wait)");
-            }
-            else if (tmp == "1C")
-            {
-                AppendLog("Message Identifier:  1C(Insert, Swipe or Try another card)");
-            }
-            else if (tmp == "1D")
-            {
-                AppendLog("Message Identifier:  1D(Please insert card)");
-            }
-            else if (tmp == "20")
-            {
-                AppendLog("Message Identifier:  20(See Phone for Instructions)");
-            }
-            else if (tmp == "21")
-            {
-                AppendLog("Message Identifier:  21(Present Card Again)");
-            }
-            else if (tmp == "FF")
-            {
-                AppendLog("Message Identifier:  N/A");
-            }
-            else
-            {
-                AppendLog("Message Identifier:  Invalid Data");
-            }
+                AppendLog($"ArgumentOutOfRangeException: {e.Message}\nStackTrace: {e.StackTrace}");
+            }            
             //Status:
             tmp = msg.Substring(2, 2);
-            if (tmp == "00")
+            try
             {
-                AppendLog("Status:  NOT READY\n");
+                if (tmp == "00")
+                {
+                    AppendLog("Status:  NOT READY\n");
+                }
+                else if (tmp == "01")
+                {
+                    AppendLog("Status:  IDLE\n");
+                }
+                else if (tmp == "02")
+                {
+                    AppendLog("Status:  READY TO READ\n");
+                }
+                else if (tmp == "03")
+                {
+                    AppendLog("Status:  PROCESSING\n");
+                }
+                else if (tmp == "04")
+                {
+                    AppendLog("Status:  CARD READ SUCCESSFULLY\n");
+                }
+                else if (tmp == "05")
+                {
+                    AppendLog("Status:  PROCESSING ERROR\n");
+                }
+                else if (tmp == "FF")
+                {
+                    AppendLog("Status:  N/A\n");
+                }
+                else
+                {
+                    AppendLog("Status:  Invalid Data\n");
+                }
+
             }
-            else if (tmp == "01")
+            catch(ArgumentOutOfRangeException e)
             {
-                AppendLog("Status:  IDLE\n");
-            }
-            else if (tmp == "02")
-            {
-                AppendLog("Status:  READY TO READ\n");
-            }
-            else if (tmp == "03")
-            {
-                AppendLog("Status:  PROCESSING\n");
-            }
-            else if (tmp == "04")
-            {
-                AppendLog("Status:  CARD READ SUCCESSFULLY\n");
-            }
-            else if (tmp == "05")
-            {
-                AppendLog("Status:  PROCESSING ERROR\n");
-            }
-            else if (tmp == "FF")
-            {
-                AppendLog("Status:  N/A\n");
-            }
-            else
-            {
-                AppendLog("Status:  Invalid Data\n");
+                AppendLog($"ArgumentOutOfRangeException: {e.Message}\nStackTrace: {e.StackTrace}");
             }
             //Hold Time:
             tmp = msg.Substring(4, 6);
@@ -1223,7 +1302,7 @@ namespace AuthHost
             }
             catch (ArgumentOutOfRangeException e)
             {
-                AppendLog("Show Hold Time fail!length invalid!");
+                AppendLog($"ArgumentOutOfRangeException: {e.Message}\nStackTrace: {e.StackTrace}");
             }
             //Language Preference:
             tmp = msg.Substring(10, 16);
@@ -1233,7 +1312,7 @@ namespace AuthHost
             }
             catch (ArgumentOutOfRangeException e)
             {
-                AppendLog("Show Language Preference fail!length invalid!");
+                AppendLog($"ArgumentOutOfRangeException: {e.Message}\nStackTrace: {e.StackTrace}");
             }
             //Value Qualifier:
             tmp = msg.Substring(26, 2);
@@ -1243,7 +1322,7 @@ namespace AuthHost
             }
             catch (ArgumentOutOfRangeException e)
             {
-                AppendLog("Show Value Qualifier fail!length invalid!");
+                AppendLog($"ArgumentOutOfRangeException: {e.Message}\nStackTrace: {e.StackTrace}");
             }
             //Value
             tmp = msg.Substring(28, 12);
@@ -1257,6 +1336,7 @@ namespace AuthHost
             catch (ArgumentOutOfRangeException e)
             {
                 AppendLog("Show Value fail!length invalid!");
+                AppendLog($"ArgumentOutOfRangeException: {e.Message}\nStackTrace: {e.StackTrace}");
             }
             //Currency Code
             tmp = msg.Substring(40, 4);
@@ -1270,6 +1350,7 @@ namespace AuthHost
             catch (ArgumentOutOfRangeException e)
             {
                 AppendLog("Show Currency Code fail!length invalid!");
+                AppendLog($"ArgumentOutOfRangeException: {e.Message}\nStackTrace: {e.StackTrace}");
             }
 
         }
@@ -1503,7 +1584,7 @@ namespace AuthHost
             string receivedData = Tool.ByteArrayToBcdString(data);
             bool needParseTLV = true;
 
-            AppendLog("Recv TCP Data: "+ receivedData);
+            AppendLog("Recv Data: "+ receivedData);
 
             if(data.Length == 4)
             {
@@ -1573,6 +1654,83 @@ namespace AuthHost
         private void OnErrorOccurred(object sender, string errorMessage)
         {
             AppendLog(errorMessage);
+        }
+
+        private void button_ScanSerial_Click(object sender, EventArgs e)
+        {
+            if(this.comboBox_SerialPort.Items.Count > 0)
+            {
+                this.comboBox_SerialPort.Items.Clear();
+            }
+
+            string[] ports = SerialPort.GetPortNames();
+            List<string> portList = new List<string>();
+            foreach (string port in ports)
+            {
+                portList.Add(port);
+            }
+            UpdateSerialPortList(portList);
+            if (this.comboBox_SerialPort.Items.Count > 0)
+            {
+                this.comboBox_SerialPort.SelectedIndex = 0;
+            }
+        }
+
+        private void button_OpenSerial_Click(object sender, EventArgs e)
+        {
+            string portName = this.comboBox_SerialPort.SelectedItem.ToString();
+            int baudRate = Convert.ToInt32(this.comboBox_SerialBaud.SelectedItem.ToString());
+
+            // 打开串口
+            this.serialPort.OpenPort(portName, baudRate);
+
+            this.button_ListenTCP.Enabled = false;
+            this.button_CloseTCP.Enabled = true;
+        }
+
+        private void textBox_CurrencyExp_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar))
+            {
+                e.Handled = true;
+            }
+        }
+
+        private void textBox_CurrencyExp_TextChanged(object sender, EventArgs e)
+        {
+            int num;
+            //货币指数如果输入不为0-11的数字，则清空输入框
+            if (int.TryParse(this.textBox_CurrencyExp.Text, out num))
+            {
+                if(num < 0 || num > 11)
+                {
+                    this.textBox_CurrencyExp.Text = "";
+                }
+            }
+            else
+            {
+                this.textBox_CurrencyExp.Text = "";
+            }
+        }
+
+        private void textBox_CurrencyCode_TextChanged(object sender, EventArgs e)
+        {
+            if (textBox_CurrencyCode.Text.Length > 4)
+            {
+                // 如果长度大于4，截取前4个字符
+                textBox_CurrencyCode.Text = textBox_CurrencyCode.Text.Substring(0, 4);
+                // 把光标设置到文本的末尾
+                textBox_CurrencyCode.SelectionStart = textBox_CurrencyCode.Text.Length;
+                textBox_CurrencyCode.SelectionLength = 0;
+            }
+        }
+
+        private void textBox_CurrencyCode_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar))
+            {
+                e.Handled = true;
+            }
         }
     }
 }

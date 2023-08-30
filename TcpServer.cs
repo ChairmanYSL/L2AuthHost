@@ -116,7 +116,7 @@ public class TCPServer
         catch (Exception ex)
         {
             ErrorOccurred?.Invoke(this, ex.Message);
-            Console.WriteLine($"TCP error occurred: {ex.Message}");
+            LogNeeded.Invoke($"TCP error occurred: {ex.Message}");
         }
     }
 

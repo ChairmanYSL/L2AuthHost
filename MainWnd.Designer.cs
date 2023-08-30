@@ -71,13 +71,13 @@ namespace AuthHost
             this.comboBox_ExcpFileCfg = new System.Windows.Forms.ComboBox();
             this.comboBox_CAPKCfg = new System.Windows.Forms.ComboBox();
             this.comboBox_AIDCfg = new System.Windows.Forms.ComboBox();
-            this.label11 = new System.Windows.Forms.Label();
-            this.label10 = new System.Windows.Forms.Label();
-            this.label9 = new System.Windows.Forms.Label();
-            this.label8 = new System.Windows.Forms.Label();
-            this.label7 = new System.Windows.Forms.Label();
-            this.label6 = new System.Windows.Forms.Label();
-            this.label5 = new System.Windows.Forms.Label();
+            this.label_PreProcess = new System.Windows.Forms.Label();
+            this.label_Revokey = new System.Windows.Forms.Label();
+            this.label_SimData = new System.Windows.Forms.Label();
+            this.label_DRL = new System.Windows.Forms.Label();
+            this.label_Excpfile = new System.Windows.Forms.Label();
+            this.label_CAPK = new System.Windows.Forms.Label();
+            this.label_AID = new System.Windows.Forms.Label();
             this.tabControl_CommuType = new System.Windows.Forms.TabControl();
             this.tabPage_SerialSetting = new System.Windows.Forms.TabPage();
             this.button_OpenSerial = new System.Windows.Forms.Button();
@@ -91,8 +91,12 @@ namespace AuthHost
             this.button_ListenTCP = new System.Windows.Forms.Button();
             this.textBox_TCPPort = new System.Windows.Forms.TextBox();
             this.comboBox_IPAddr = new System.Windows.Forms.ComboBox();
-            this.label4 = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
+            this.label_IPPort = new System.Windows.Forms.Label();
+            this.label_IPAddr = new System.Windows.Forms.Label();
+            this.groupBox_CurrencyCode = new System.Windows.Forms.GroupBox();
+            this.textBox_CurrencyCode = new System.Windows.Forms.TextBox();
+            this.groupBox_CurrencyExp = new System.Windows.Forms.GroupBox();
+            this.textBox_CurrencyExp = new System.Windows.Forms.TextBox();
             this.menuStrip1.SuspendLayout();
             this.groupBox_Brand.SuspendLayout();
             this.groupBox_Amount.SuspendLayout();
@@ -106,6 +110,8 @@ namespace AuthHost
             this.tabControl_CommuType.SuspendLayout();
             this.tabPage_SerialSetting.SuspendLayout();
             this.tabPage_TCPSetting.SuspendLayout();
+            this.groupBox_CurrencyCode.SuspendLayout();
+            this.groupBox_CurrencyExp.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -305,13 +311,13 @@ namespace AuthHost
             this.groupBox_Config.Controls.Add(this.comboBox_ExcpFileCfg);
             this.groupBox_Config.Controls.Add(this.comboBox_CAPKCfg);
             this.groupBox_Config.Controls.Add(this.comboBox_AIDCfg);
-            this.groupBox_Config.Controls.Add(this.label11);
-            this.groupBox_Config.Controls.Add(this.label10);
-            this.groupBox_Config.Controls.Add(this.label9);
-            this.groupBox_Config.Controls.Add(this.label8);
-            this.groupBox_Config.Controls.Add(this.label7);
-            this.groupBox_Config.Controls.Add(this.label6);
-            this.groupBox_Config.Controls.Add(this.label5);
+            this.groupBox_Config.Controls.Add(this.label_PreProcess);
+            this.groupBox_Config.Controls.Add(this.label_Revokey);
+            this.groupBox_Config.Controls.Add(this.label_SimData);
+            this.groupBox_Config.Controls.Add(this.label_DRL);
+            this.groupBox_Config.Controls.Add(this.label_Excpfile);
+            this.groupBox_Config.Controls.Add(this.label_CAPK);
+            this.groupBox_Config.Controls.Add(this.label_AID);
             this.groupBox_Config.Location = new System.Drawing.Point(831, 29);
             this.groupBox_Config.Name = "groupBox_Config";
             this.groupBox_Config.Size = new System.Drawing.Size(458, 614);
@@ -495,68 +501,68 @@ namespace AuthHost
             this.comboBox_AIDCfg.Size = new System.Drawing.Size(121, 20);
             this.comboBox_AIDCfg.TabIndex = 7;
             // 
-            // label11
+            // label_PreProcess
             // 
-            this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(19, 306);
-            this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(65, 12);
-            this.label11.TabIndex = 6;
-            this.label11.Text = "PreProcess";
+            this.label_PreProcess.AutoSize = true;
+            this.label_PreProcess.Location = new System.Drawing.Point(19, 306);
+            this.label_PreProcess.Name = "label_PreProcess";
+            this.label_PreProcess.Size = new System.Drawing.Size(65, 12);
+            this.label_PreProcess.TabIndex = 6;
+            this.label_PreProcess.Text = "PreProcess";
             // 
-            // label10
+            // label_Revokey
             // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(19, 260);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(47, 12);
-            this.label10.TabIndex = 5;
-            this.label10.Text = "RevoKey";
+            this.label_Revokey.AutoSize = true;
+            this.label_Revokey.Location = new System.Drawing.Point(19, 260);
+            this.label_Revokey.Name = "label_Revokey";
+            this.label_Revokey.Size = new System.Drawing.Size(47, 12);
+            this.label_Revokey.TabIndex = 5;
+            this.label_Revokey.Text = "RevoKey";
             // 
-            // label9
+            // label_SimData
             // 
-            this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(17, 212);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(47, 12);
-            this.label9.TabIndex = 4;
-            this.label9.Text = "SimData";
+            this.label_SimData.AutoSize = true;
+            this.label_SimData.Location = new System.Drawing.Point(17, 212);
+            this.label_SimData.Name = "label_SimData";
+            this.label_SimData.Size = new System.Drawing.Size(47, 12);
+            this.label_SimData.TabIndex = 4;
+            this.label_SimData.Text = "SimData";
             // 
-            // label8
+            // label_DRL
             // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(17, 161);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(23, 12);
-            this.label8.TabIndex = 3;
-            this.label8.Text = "DRL";
+            this.label_DRL.AutoSize = true;
+            this.label_DRL.Location = new System.Drawing.Point(17, 161);
+            this.label_DRL.Name = "label_DRL";
+            this.label_DRL.Size = new System.Drawing.Size(23, 12);
+            this.label_DRL.TabIndex = 3;
+            this.label_DRL.Text = "DRL";
             // 
-            // label7
+            // label_Excpfile
             // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(6, 111);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(89, 12);
-            this.label7.TabIndex = 2;
-            this.label7.Text = "Exception File";
+            this.label_Excpfile.AutoSize = true;
+            this.label_Excpfile.Location = new System.Drawing.Point(6, 111);
+            this.label_Excpfile.Name = "label_Excpfile";
+            this.label_Excpfile.Size = new System.Drawing.Size(89, 12);
+            this.label_Excpfile.TabIndex = 2;
+            this.label_Excpfile.Text = "Exception File";
             // 
-            // label6
+            // label_CAPK
             // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(19, 71);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(29, 12);
-            this.label6.TabIndex = 1;
-            this.label6.Text = "CAPK";
+            this.label_CAPK.AutoSize = true;
+            this.label_CAPK.Location = new System.Drawing.Point(19, 71);
+            this.label_CAPK.Name = "label_CAPK";
+            this.label_CAPK.Size = new System.Drawing.Size(29, 12);
+            this.label_CAPK.TabIndex = 1;
+            this.label_CAPK.Text = "CAPK";
             // 
-            // label5
+            // label_AID
             // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(17, 27);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(23, 12);
-            this.label5.TabIndex = 0;
-            this.label5.Text = "AID";
+            this.label_AID.AutoSize = true;
+            this.label_AID.Location = new System.Drawing.Point(17, 27);
+            this.label_AID.Name = "label_AID";
+            this.label_AID.Size = new System.Drawing.Size(23, 12);
+            this.label_AID.TabIndex = 0;
+            this.label_AID.Text = "AID";
             // 
             // tabControl_CommuType
             // 
@@ -592,6 +598,7 @@ namespace AuthHost
             this.button_OpenSerial.TabIndex = 5;
             this.button_OpenSerial.Text = "Open";
             this.button_OpenSerial.UseVisualStyleBackColor = true;
+            this.button_OpenSerial.Click += new System.EventHandler(this.button_OpenSerial_Click);
             // 
             // button_ScanSerial
             // 
@@ -601,6 +608,7 @@ namespace AuthHost
             this.button_ScanSerial.TabIndex = 4;
             this.button_ScanSerial.Text = "Scan";
             this.button_ScanSerial.UseVisualStyleBackColor = true;
+            this.button_ScanSerial.Click += new System.EventHandler(this.button_ScanSerial_Click);
             // 
             // comboBox_SerialBaud
             // 
@@ -643,8 +651,8 @@ namespace AuthHost
             this.tabPage_TCPSetting.Controls.Add(this.button_ListenTCP);
             this.tabPage_TCPSetting.Controls.Add(this.textBox_TCPPort);
             this.tabPage_TCPSetting.Controls.Add(this.comboBox_IPAddr);
-            this.tabPage_TCPSetting.Controls.Add(this.label4);
-            this.tabPage_TCPSetting.Controls.Add(this.label3);
+            this.tabPage_TCPSetting.Controls.Add(this.label_IPPort);
+            this.tabPage_TCPSetting.Controls.Add(this.label_IPAddr);
             this.tabPage_TCPSetting.Location = new System.Drawing.Point(4, 22);
             this.tabPage_TCPSetting.Name = "tabPage_TCPSetting";
             this.tabPage_TCPSetting.Padding = new System.Windows.Forms.Padding(3);
@@ -689,29 +697,69 @@ namespace AuthHost
             this.comboBox_IPAddr.TabIndex = 2;
             this.comboBox_IPAddr.Click += new System.EventHandler(this.comboBox_IPAddr_Click);
             // 
-            // label4
+            // label_IPPort
             // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(18, 85);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(29, 12);
-            this.label4.TabIndex = 1;
-            this.label4.Text = "Port";
+            this.label_IPPort.AutoSize = true;
+            this.label_IPPort.Location = new System.Drawing.Point(18, 85);
+            this.label_IPPort.Name = "label_IPPort";
+            this.label_IPPort.Size = new System.Drawing.Size(29, 12);
+            this.label_IPPort.TabIndex = 1;
+            this.label_IPPort.Text = "Port";
             // 
-            // label3
+            // label_IPAddr
             // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(16, 22);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(47, 12);
-            this.label3.TabIndex = 0;
-            this.label3.Text = "Address";
+            this.label_IPAddr.AutoSize = true;
+            this.label_IPAddr.Location = new System.Drawing.Point(16, 22);
+            this.label_IPAddr.Name = "label_IPAddr";
+            this.label_IPAddr.Size = new System.Drawing.Size(47, 12);
+            this.label_IPAddr.TabIndex = 0;
+            this.label_IPAddr.Text = "Address";
+            // 
+            // groupBox_CurrencyCode
+            // 
+            this.groupBox_CurrencyCode.Controls.Add(this.textBox_CurrencyCode);
+            this.groupBox_CurrencyCode.Location = new System.Drawing.Point(13, 312);
+            this.groupBox_CurrencyCode.Name = "groupBox_CurrencyCode";
+            this.groupBox_CurrencyCode.Size = new System.Drawing.Size(142, 53);
+            this.groupBox_CurrencyCode.TabIndex = 14;
+            this.groupBox_CurrencyCode.TabStop = false;
+            this.groupBox_CurrencyCode.Text = "CurrencyCode";
+            // 
+            // textBox_CurrencyCode
+            // 
+            this.textBox_CurrencyCode.Location = new System.Drawing.Point(9, 21);
+            this.textBox_CurrencyCode.Name = "textBox_CurrencyCode";
+            this.textBox_CurrencyCode.Size = new System.Drawing.Size(125, 21);
+            this.textBox_CurrencyCode.TabIndex = 0;
+            this.textBox_CurrencyCode.TextChanged += new System.EventHandler(this.textBox_CurrencyCode_TextChanged);
+            this.textBox_CurrencyCode.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox_CurrencyCode_KeyPress);
+            // 
+            // groupBox_CurrencyExp
+            // 
+            this.groupBox_CurrencyExp.Controls.Add(this.textBox_CurrencyExp);
+            this.groupBox_CurrencyExp.Location = new System.Drawing.Point(13, 387);
+            this.groupBox_CurrencyExp.Name = "groupBox_CurrencyExp";
+            this.groupBox_CurrencyExp.Size = new System.Drawing.Size(142, 53);
+            this.groupBox_CurrencyExp.TabIndex = 15;
+            this.groupBox_CurrencyExp.TabStop = false;
+            this.groupBox_CurrencyExp.Text = "CurrencyExponent";
+            // 
+            // textBox_CurrencyExp
+            // 
+            this.textBox_CurrencyExp.Location = new System.Drawing.Point(9, 21);
+            this.textBox_CurrencyExp.Name = "textBox_CurrencyExp";
+            this.textBox_CurrencyExp.Size = new System.Drawing.Size(125, 21);
+            this.textBox_CurrencyExp.TabIndex = 0;
+            this.textBox_CurrencyExp.TextChanged += new System.EventHandler(this.textBox_CurrencyExp_TextChanged);
+            this.textBox_CurrencyExp.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox_CurrencyExp_KeyPress);
             // 
             // MainWnd
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1301, 678);
+            this.Controls.Add(this.groupBox_CurrencyExp);
+            this.Controls.Add(this.groupBox_CurrencyCode);
             this.Controls.Add(this.tabControl_CommuType);
             this.Controls.Add(this.groupBox_Config);
             this.Controls.Add(this.groupBox_Message);
@@ -753,6 +801,10 @@ namespace AuthHost
             this.tabPage_SerialSetting.PerformLayout();
             this.tabPage_TCPSetting.ResumeLayout(false);
             this.tabPage_TCPSetting.PerformLayout();
+            this.groupBox_CurrencyCode.ResumeLayout(false);
+            this.groupBox_CurrencyCode.PerformLayout();
+            this.groupBox_CurrencyExp.ResumeLayout(false);
+            this.groupBox_CurrencyExp.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -793,8 +845,8 @@ namespace AuthHost
         private System.Windows.Forms.Button button_ListenTCP;
         private System.Windows.Forms.TextBox textBox_TCPPort;
         private System.Windows.Forms.ComboBox comboBox_IPAddr;
-        private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label label_IPPort;
+        private System.Windows.Forms.Label label_IPAddr;
         private System.Windows.Forms.GroupBox groupBox_ISAuthData;
         private System.Windows.Forms.TextBox textBox_ISAuthData;
         private System.Windows.Forms.GroupBox groupBox_ISScript;
@@ -814,14 +866,18 @@ namespace AuthHost
         private System.Windows.Forms.ComboBox comboBox_ExcpFileCfg;
         private System.Windows.Forms.ComboBox comboBox_CAPKCfg;
         private System.Windows.Forms.ComboBox comboBox_AIDCfg;
-        private System.Windows.Forms.Label label11;
-        private System.Windows.Forms.Label label10;
-        private System.Windows.Forms.Label label9;
-        private System.Windows.Forms.Label label8;
-        private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label label_PreProcess;
+        private System.Windows.Forms.Label label_Revokey;
+        private System.Windows.Forms.Label label_SimData;
+        private System.Windows.Forms.Label label_DRL;
+        private System.Windows.Forms.Label label_Excpfile;
+        private System.Windows.Forms.Label label_CAPK;
+        private System.Windows.Forms.Label label_AID;
         private System.Windows.Forms.Button button_ExcpFileDownld;
+        private System.Windows.Forms.GroupBox groupBox_CurrencyCode;
+        private System.Windows.Forms.TextBox textBox_CurrencyCode;
+        private System.Windows.Forms.GroupBox groupBox_CurrencyExp;
+        private System.Windows.Forms.TextBox textBox_CurrencyExp;
     }
 }
 
