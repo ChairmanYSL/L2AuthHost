@@ -11,6 +11,7 @@ using System.Threading;
 using System.Text;
 using System.Linq;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using System.Runtime.CompilerServices;
 
 namespace AuthHost
 {
@@ -22,6 +23,7 @@ namespace AuthHost
         private Config config = new Config();
         private TCPServer tcpServer;
         private SerialCom serialPort;
+        private byte CommunicationType;
         private enum MsgType
         {
             FINANCE_REQ_SEND = 1,
@@ -63,6 +65,13 @@ namespace AuthHost
             DRL_DOWNLOAD_RECV,
             TERM_OUTCOME_RECV,
             RC_UPLOAD_RESULT,
+        };
+
+        public enum CommType
+        {
+            UNKNOW,
+            SERIAL,
+            TCP,
         };
 
         public MainWnd()
@@ -491,6 +500,7 @@ namespace AuthHost
             //选择用TCP作为交互信道时，禁用串口相关按钮
             button_OpenSerial.Enabled = false;
             button_ScanSerial.Enabled = false;
+            this.CommunicationType = (byte)CommType.TCP;
         }
 
         private void button_CloseTCP_Click(object sender, EventArgs e)
@@ -505,6 +515,7 @@ namespace AuthHost
             //恢复串口相关按钮
             button_ScanSerial.Enabled = true;
             button_OpenSerial.Enabled = true;
+            this.CommunicationType = (byte)CommType.UNKNOW;
         }
 
         public void AppendLog(string logMessage)
@@ -521,37 +532,37 @@ namespace AuthHost
 
         private void DownloadAID()
         {
-            this.config.DownloadXml(Config.CfgType.CfgAID, this.tcpServer);
+            this.config.DownloadXml(Config.CfgType.CfgAID, this.CommunicationType, this.tcpServer, this.serialPort);
         }
 
         private void DownloadCAPK()
         {
-            this.config.DownloadXml(Config.CfgType.CfgCAPK, this.tcpServer);
+            this.config.DownloadXml(Config.CfgType.CfgCAPK, this.CommunicationType, this.tcpServer, this.serialPort);
         }
 
         private void DownloadDRL()
         {
-            this.config.DownloadXml(Config.CfgType.CfgDRL, tcpServer);
+            this.config.DownloadXml(Config.CfgType.CfgDRL, this.CommunicationType, tcpServer, this.serialPort);
         }
 
         private void DownloadExceptionFile()
         {
-            this.config.DownloadXml(Config.CfgType.CfgExcpFile, tcpServer);
+            this.config.DownloadXml(Config.CfgType.CfgExcpFile, this.CommunicationType, tcpServer, this.serialPort);
         }
 
         private void DownloadTermParam()
         {
-            this.config.DownloadXml(Config.CfgType.CfgTermParm, tcpServer);
+            this.config.DownloadXml(Config.CfgType.CfgTermParm, this.CommunicationType, tcpServer, this.serialPort);
         }
 
         private void DownloadRevokey()
         {
-            this.config.DownloadXml(Config.CfgType.CfgRevokey, tcpServer);
+            this.config.DownloadXml(Config.CfgType.CfgRevokey, this.CommunicationType, tcpServer, this.serialPort);
         }
 
         private void DownloadBlacklist()
         {
-            this.config.DownloadXml(Config.CfgType.CfgExcpFile, tcpServer);
+            this.config.DownloadXml(Config.CfgType.CfgExcpFile, this.CommunicationType, tcpServer, this.serialPort);
         }
 
         private void StartTrans()
@@ -592,10 +603,12 @@ namespace AuthHost
             if(this.checkBox_AmtPres.Checked)
             {
                 transAmt = transAmt.Replace(".", "");
+                AppendLog($"transAmt after Replace: {transAmt}");
+                AppendLog($"transAmt.Length: {transAmt.Length}");
                 if (transAmt.Length < 12)
                 {
                     tmpLen = transAmt.Length;
-                    for (int i = 0; i < tmpLen; i++)
+                    for (int i = 0; i < 12 - tmpLen; i++)
                     {
                         transAmt = transAmt.Insert(0, "0");
                     }
@@ -610,7 +623,7 @@ namespace AuthHost
                 if (transAmtOth.Length < 12)
                 {
                     tmpLen = transAmtOth.Length;
-                    for (int i = 0; i < tmpLen; i++)
+                    for (int i = 0; i < 12-tmpLen; i++)
                     {
                         transAmtOth = transAmtOth.Insert(0, "0");
                     }
@@ -685,7 +698,21 @@ namespace AuthHost
             //}
 
             sendData[3] = (byte)sendLen;
-            this.tcpServer.SendData(sendData);
+
+            AppendLog("Send Data: "+Tool.HexByteArrayToString(sendData));
+
+            if(this.CommunicationType == (byte)CommType.TCP)
+            {
+                this.tcpServer.SendData(sendData);
+            }
+            else if(this.CommunicationType == (byte)CommType.SERIAL)
+            {
+                this.serialPort.SendData(sendData);
+            }
+            else
+            {
+                AppendLog("Error: Current Communicate Type is Null");
+            }
         }
 
         private void DealFinanceRequest(byte[] tlvs)
@@ -749,7 +776,18 @@ namespace AuthHost
                 high = (byte)(sendData.Length / 2 / 256);
                 low = (byte)(sendData.Length / 2 % 256);
                 sendData = "02" + "01" + high.ToString("X2") + low.ToString("X2") + sendData;
-                this.tcpServer.SendData(Tool.StringToHexByteArray(sendData));
+                if(this.CommunicationType == (byte)CommType.TCP)
+                {
+                    this.tcpServer.SendData(Tool.StringToHexByteArray(sendData));
+                }
+                else if(this.CommunicationType == (byte)CommType.SERIAL)
+                {
+                    this.serialPort.SendData(Tool.StringToHexByteArray(sendData));
+                }
+                else
+                {
+                    AppendLog("Error: Current Communicate Type is Null");
+                }
             }
         }
 
@@ -814,7 +852,19 @@ namespace AuthHost
                 high = (byte)(sendData.Length / 2 / 256);
                 low = (byte)(sendData.Length / 2 % 256);
                 sendData = "02" + "02" + high.ToString("X2") + low.ToString("X2") + sendData;
-                this.tcpServer.SendData(Tool.StringToHexByteArray(sendData));
+
+                if (this.CommunicationType == (byte)CommType.TCP)
+                {
+                    this.tcpServer.SendData(Tool.StringToHexByteArray(sendData));
+                }
+                else if (this.CommunicationType == (byte)CommType.SERIAL)
+                {
+                    this.serialPort.SendData(Tool.StringToHexByteArray(sendData));
+                }
+                else
+                {
+                    AppendLog("Error: Current Communicate Type is Null");
+                }
             }
         }
 
@@ -1686,6 +1736,8 @@ namespace AuthHost
 
             this.button_ListenTCP.Enabled = false;
             this.button_CloseTCP.Enabled = true;
+            this.button_OpenSerial.Enabled = false;
+            this.CommunicationType = (byte)CommType.SERIAL;
         }
 
         private void textBox_CurrencyExp_KeyPress(object sender, KeyPressEventArgs e)

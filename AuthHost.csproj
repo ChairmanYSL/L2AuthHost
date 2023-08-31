@@ -103,6 +103,7 @@
     <Compile Include="TCPServer.cs" />
     <Compile Include="TLVObject.cs" />
     <Compile Include="Tool.cs" />
+    <Compile Include="UDPServer.cs" />
     <EmbeddedResource Include="MainWnd.resx">
       <DependentUpon>MainWnd.cs</DependentUpon>
     </EmbeddedResource>

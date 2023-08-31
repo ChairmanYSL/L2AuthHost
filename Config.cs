@@ -325,7 +325,7 @@ namespace AuthHost
             }
         }
 
-        public void DownloadXml(CfgType type, TCPServer tcpServer)
+        public void DownloadXml(CfgType type, byte commuType, TCPServer tcpServer, SerialCom serialCom)
         {
             byte[] bytes = new byte[2044];
             byte[] sendData;
@@ -768,10 +768,22 @@ namespace AuthHost
                     return ;
             }
 
-            if(tcpServer != null && sendData != null)
+            if(commuType == (byte)MainWnd.CommType.TCP)
             {
-                tcpServer.SendData(sendData);
+                if (tcpServer != null && sendData != null)
+                {
+                    tcpServer.SendData(sendData);
+                }
             }
+            else if(commuType == (byte)MainWnd.CommType.SERIAL)
+            {
+                if(serialCom != null && sendData != null)
+                {
+                    serialCom.SendData(sendData);
+                }
+            }
+
+
         }        
     }
 
