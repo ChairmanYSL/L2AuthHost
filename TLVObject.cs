@@ -10,7 +10,9 @@ namespace AuthHost
     class TLVObject
     {
         public Dictionary<string, string> tlvDic = new Dictionary<string, string>();
-        
+        public delegate void LogDelegate(string message);
+        public event LogDelegate LogNeeded;
+
         public bool Exist(string tag)
         {
             return tlvDic.ContainsKey(tag);
@@ -36,7 +38,11 @@ namespace AuthHost
         public bool parse_tlvstring(string tlv)
         {
             // First, we need to ensure the tlv string length is even
-            if (tlv.Length % 2 != 0) return false;
+            if (tlv.Length % 2 != 0)
+            {
+                Logger.Instance.Log("TLV string length is not even");
+                return false;
+            } 
 
             try
             {
@@ -52,14 +58,22 @@ namespace AuthHost
                         if ((Convert.ToByte(tlv.Substring(i + 2, 2), 16) & 0x80) == 0x80)
                         {
                             // Tag is 3 bytes
-                            if (i + 6 > tlv.Length) return false; // Bounds check for 3 bytes tag
+                            if (i + 6 > tlv.Length)
+                            {
+                                Logger.Instance.Log("TLV string ends after tag");
+                                return false; // Bounds check for 3 bytes tag
+                            } 
                             tag = tlv.Substring(i, 6);
                             i += 6; // Move past the 3-byte tag
                         }
                         else
                         {
                             // Tag is 2 bytes
-                            if (i + 4 > tlv.Length) return false; // Bounds check for 2 bytes tag
+                            if (i + 4 > tlv.Length)
+                            {
+                                Logger.Instance.Log("TLV string ends after tag");
+                                return false; // Bounds check for 2 bytes tag
+                            } 
                             tag = tlv.Substring(i, 4);
                             i += 4; // Move past the 2-byte tag
                         }
@@ -71,7 +85,11 @@ namespace AuthHost
                         i += 2; // Move past the 1-byte tag
                     }
 
-                    if (i >= tlv.Length) return false; // Bounds check
+                    if (i >= tlv.Length)
+                    {
+                        Logger.Instance.Log("TLV string ends after tag");
+                        return false; // Bounds check
+                    } 
 
                     // Determine length
                     int len;
@@ -82,7 +100,11 @@ namespace AuthHost
                         len = 0;
                         for (int j = 1; j <= numberOfLengthBytes; j++)
                         {
-                            if (i + j * 2 >= tlv.Length) return false; // Bounds check
+                            if (i + j * 2 >= tlv.Length)
+                            {
+                                Logger.Instance.Log("TLV string ends after length");
+                                return false; // Bounds check
+                            } 
                             len = (len << 8) + Convert.ToByte(tlv.Substring(i + j * 2, 2), 16); // Construct the length from the subsequent bytes
                         }
                         i += (numberOfLengthBytes + 1) * 2; // Move past all length bytes
@@ -94,7 +116,11 @@ namespace AuthHost
                         i += 2; // Move past the length byte
                     }
 
-                    if (i + len * 2 > tlv.Length) return false; // Bounds check
+                    if (i + len * 2 > tlv.Length)
+                    {
+                        Logger.Instance.Log("TLV string ends after value");
+                        return false; // Bounds check
+                    } 
 
                     // Extract the value
                     string value = tlv.Substring(i, len * 2);
@@ -109,6 +135,7 @@ namespace AuthHost
             catch
             {
                 // If there's any error in the process
+                Logger.Instance.Log("Error parsing TLV string");
                 return false;
             }
         }

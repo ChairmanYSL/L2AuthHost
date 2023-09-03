@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Windows.Forms;
@@ -44,7 +45,11 @@ namespace AuthHost
         {
             if(_isEnabled)
             {
-                string formattedMessage = $"{DateTime.Now}: {message}";
+                var stackTrace = new StackTrace(true);
+                var frame = stackTrace.GetFrame(1); // 1 表示上一层的栈帧
+                var line = frame.GetFileLineNumber();
+
+                string formattedMessage = $"{DateTime.Now}  [Line: {line}]: {message}";
                 File.AppendAllText(_logFilePath, formattedMessage + Environment.NewLine);
             }
         }

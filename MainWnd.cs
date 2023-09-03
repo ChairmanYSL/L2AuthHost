@@ -24,6 +24,7 @@ namespace AuthHost
         private TCPServer tcpServer;
         private SerialCom serialPort;
         private byte CommunicationType;
+        private TLVObject ptLVObject = new TLVObject();
         private enum MsgType
         {
             FINANCE_REQ_SEND = 1,
@@ -88,6 +89,7 @@ namespace AuthHost
             serialPort = new SerialCom();
             serialPort.LogNeeded += AppendLog;
             serialPort.DataReceived += OnDataReceived;
+            ptLVObject.LogNeeded += AppendLog;
         }
 
         private void MainWnd_FormClosing(object sender, FormClosingEventArgs e)
@@ -637,7 +639,7 @@ namespace AuthHost
                 AppendLog("Current Trans Type 9C:" + transType);
             }
 
-            byte[] sendData = new byte[25];
+            byte[] sendData = new byte[64];
             byte[] bcdCode;
             int sendLen=0;
 
@@ -677,25 +679,25 @@ namespace AuthHost
                 sendLen += bcdCode.Length;
             }
 
-            //if(this.textBox_CurrencyCode.Text != "")
-            //{
-            //    byte[] tmp = new byte[] { 0x5F, 0x2A, 0x02 };
-            //    Array.Copy(tmp, 0, sendData, sendLen, tmp.Length);
-            //    sendLen += tmp.Length;
-            //    bcdCode = Tool.StringToBCD(currencyCode);
-            //    Array.Copy(bcdCode, 0, sendData, sendLen, bcdCode.Length);
-            //    sendLen += bcdCode.Length;
-            //}
+            if (this.textBox_CurrencyCode.Text != "")
+            {
+                byte[] tmp = new byte[] { 0x5F, 0x2A, 0x02 };
+                Array.Copy(tmp, 0, sendData, sendLen, tmp.Length);
+                sendLen += tmp.Length;
+                bcdCode = Tool.StringToBCD(currencyCode);
+                Array.Copy(bcdCode, 0, sendData, sendLen, bcdCode.Length);
+                sendLen += bcdCode.Length;
+            }
 
-            //if(this.textBox_CurrencyExp.Text != "")
-            //{
-            //    byte[] tmp = new byte[] { 0x5F, 0x36, 0x01 };
-            //    Array.Copy(tmp, 0, sendData, sendLen, tmp.Length);
-            //    sendLen += tmp.Length;
-            //    bcdCode = Tool.StringToBCD(currencyExp);
-            //    Array.Copy(bcdCode, 0, sendData, sendLen, bcdCode.Length);
-            //    sendLen += bcdCode.Length;
-            //}
+            if (this.textBox_CurrencyExp.Text != "")
+            {
+                byte[] tmp = new byte[] { 0x5F, 0x36, 0x01 };
+                Array.Copy(tmp, 0, sendData, sendLen, tmp.Length);
+                sendLen += tmp.Length;
+                bcdCode = Tool.StringToBCD(currencyExp);
+                Array.Copy(bcdCode, 0, sendData, sendLen, bcdCode.Length);
+                sendLen += bcdCode.Length;
+            }
 
             sendData[3] = (byte)sendLen;
 
@@ -1101,7 +1103,7 @@ namespace AuthHost
             {
                 AppendLog("Online Response Data:  Any");
             }
-            else if (tmp == "30")
+            else if (tmp == "F0")
             {
                 AppendLog("Online Response Data:  N/A");
             }
@@ -1219,6 +1221,24 @@ namespace AuthHost
             catch (ArgumentOutOfRangeException e)
             {
                 AppendLog($"ArgumentOutOfRangeException: {e.Message}\nStackTrace: {e.StackTrace}");
+            }
+        }
+
+        private void ShowDataRecord(string msg)
+        {
+            TLVObject tLVObject = new TLVObject();
+            
+            AppendLog("Data Record:");
+            if (tLVObject.parse_tlvstring(msg))
+            {
+                foreach (KeyValuePair<string, string> kvp in tLVObject.tlvDic)
+                {
+                    AppendLog(kvp.Key + ": " + kvp.Value);
+                }
+            }
+            else
+            {
+                AppendLog("Invalid Data");
             }
         }
 
@@ -1345,7 +1365,7 @@ namespace AuthHost
                 AppendLog($"ArgumentOutOfRangeException: {e.Message}\nStackTrace: {e.StackTrace}");
             }
             //Hold Time:
-            tmp = msg.Substring(4, 6);
+            tmp = msg.Substring(4, 2);
             try
             {
                 AppendLog("Hold Time:" + tmp);
@@ -1355,7 +1375,7 @@ namespace AuthHost
                 AppendLog($"ArgumentOutOfRangeException: {e.Message}\nStackTrace: {e.StackTrace}");
             }
             //Language Preference:
-            tmp = msg.Substring(10, 16);
+            tmp = msg.Substring(6, 4);
             try
             {
                 AppendLog("Language Preference:" + tmp);
@@ -1365,22 +1385,35 @@ namespace AuthHost
                 AppendLog($"ArgumentOutOfRangeException: {e.Message}\nStackTrace: {e.StackTrace}");
             }
             //Value Qualifier:
-            tmp = msg.Substring(26, 2);
+            tmp = msg.Substring(10, 2);
+            string valueQualifier = "";
             try
             {
-                AppendLog("Value Qualifier:" + tmp);
+                if (tmp == "20")
+                {
+                    valueQualifier = "Balance";
+                    AppendLog("Value Qualifier: "+ valueQualifier);
+                }
+                else
+                {
+                    AppendLog("Value Qualifier: N/A");
+                }
             }
             catch (ArgumentOutOfRangeException e)
             {
                 AppendLog($"ArgumentOutOfRangeException: {e.Message}\nStackTrace: {e.StackTrace}");
             }
             //Value
-            tmp = msg.Substring(28, 12);
+            tmp = msg.Substring(12, 12);
             try
             {
-                if(tmp != "FFFFFFFFFFFF")
+                if(valueQualifier == "Balance")
                 {
                     AppendLog("Value :" + tmp);
+                }
+                else
+                {
+                    AppendLog("Value : N/A");
                 }
             }
             catch (ArgumentOutOfRangeException e)
@@ -1389,10 +1422,14 @@ namespace AuthHost
                 AppendLog($"ArgumentOutOfRangeException: {e.Message}\nStackTrace: {e.StackTrace}");
             }
             //Currency Code
-            tmp = msg.Substring(40, 4);
+            tmp = msg.Substring(24, 4);
             try
             {
-                if (tmp != "FFFFFFFFFFFF")
+                if (tmp == "0000")
+                {
+                    AppendLog("Currency Code : N/A");
+                }
+                else
                 {
                     AppendLog("Currency Code :" + tmp);
                 }
@@ -1405,38 +1442,38 @@ namespace AuthHost
 
         }
 
-        private void ShowDataRecord(string msg)
-        {
-            TLVObject tLVObject = new TLVObject();
-            tLVObject.parse_tlvstring(msg);
+        //private void ShowDataRecord(string msg)
+        //{
+        //    TLVObject tLVObject = new TLVObject();
+        //    tLVObject.parse_tlvstring(msg);
 
-            foreach (KeyValuePair<string, string> kvp in tLVObject.tlvDic)
-            {
-                if(kvp.Key == "DF43")
-                {
-                    if(kvp.Value == "01")
-                    {
-                        AppendLog("Transaction Mode:  EMV Mode");
-                    }
-                    else if(kvp.Value == "02")
-                    {
-                        AppendLog("Transaction Mode:  Magstripe Mode");
-                    }
-                    else if(kvp.Value == "04")
-                    {
-                        AppendLog("Transaction Mode:  Legacy Mode");
-                    }
-                    else
-                    {
-                        AppendLog("Transaction Mode:  Invalid Data");
-                    }
-                }
-                else
-                {
-                    AppendLog(kvp.Key + ": " + kvp.Value);
-                }
-            }
-        }
+        //    foreach (KeyValuePair<string, string> kvp in tLVObject.tlvDic)
+        //    {
+        //        if(kvp.Key == "DF43")
+        //        {
+        //            if(kvp.Value == "01")
+        //            {
+        //                AppendLog("Transaction Mode:  EMV Mode");
+        //            }
+        //            else if(kvp.Value == "02")
+        //            {
+        //                AppendLog("Transaction Mode:  Magstripe Mode");
+        //            }
+        //            else if(kvp.Value == "04")
+        //            {
+        //                AppendLog("Transaction Mode:  Legacy Mode");
+        //            }
+        //            else
+        //            {
+        //                AppendLog("Transaction Mode:  Invalid Data");
+        //            }
+        //        }
+        //        else
+        //        {
+        //            AppendLog(kvp.Key + ": " + kvp.Value);
+        //        }
+        //    }
+        //}
 
         private void DealTransResult(byte[] tlvs)
         {
@@ -1562,7 +1599,7 @@ namespace AuthHost
                     }
                     else if(kvp.Key == "FF8105")
                     {
-                        ShowDataRecord(kvp.Value);
+                        //ShowDataRecord(kvp.Value);
                     }
                     else
                     {
@@ -1579,11 +1616,11 @@ namespace AuthHost
 
         private void DealTermOutcome(byte[] tlvs)
         {
-            //AppendLog("Start DealTermOutcome");
+            AppendLog("Start DealTermOutcome");
             string s = Tool.HexByteArrayToString(tlvs);
-            //AppendLog("After HexByteArrayToString s:"+s);
+            AppendLog("After HexByteArrayToString s:" + s);
             TLVObject tLVObject = new TLVObject();
-            //AppendLog("Parse TLV result:" + tLVObject.parse_tlvstring(s));
+            AppendLog("Parse TLV result:" + tLVObject.parse_tlvstring(s));
             if (tLVObject.parse_tlvstring(s))
             {
                 if(tLVObject.Exist("DF8129"))
@@ -1602,6 +1639,12 @@ namespace AuthHost
                 {
                     AppendLog("________________________________________________");
                     ShowUIRequest(tLVObject.Get("DF8117"), true);
+                    AppendLog("________________________________________________");
+                }
+                if (tLVObject.Exist("FF8105"))
+                {
+                    AppendLog("________________________________________________");
+                    ShowDataRecord(tLVObject.Get("FF8105"));
                     AppendLog("________________________________________________");
                 }
             }
@@ -1635,6 +1678,8 @@ namespace AuthHost
             bool needParseTLV = true;
 
             AppendLog("Recv Data: "+ receivedData);
+            AppendLog("Recv Protocol: " + data[1].ToString("X2"));
+            AppendLog("Recv MsgType:" + data[1]);
 
             if(data.Length == 4)
             {
