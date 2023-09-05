@@ -12,6 +12,7 @@ using System.Text;
 using System.Linq;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using System.Runtime.CompilerServices;
+using SimpleTCP;
 
 namespace AuthHost
 {
@@ -21,10 +22,12 @@ namespace AuthHost
         string curDir = Application.StartupPath;
         XmlDocument doc;
         private Config config = new Config();
-        private TCPServer tcpServer;
+        //private TCPServer tcpServer;
         private SerialCom serialPort;
         private byte CommunicationType;
         private TLVObject ptLVObject = new TLVObject();
+        private SimpleTcpServer tcpServer;
+
         private enum MsgType
         {
             FINANCE_REQ_SEND = 1,
@@ -80,21 +83,23 @@ namespace AuthHost
             InitializeComponent();
             Logger.Instance.SetEnabled(true);
             this.openToolStripMenuItem1.Checked = true;
-            tcpServer = new TCPServer();
-            tcpServer.LogNeeded += AppendLog;
-            tcpServer.DataReceived += OnDataReceived;
-            tcpServer.ErrorOccurred += OnErrorOccurred;
             config.LogNeeded += AppendLog;
+            config.SendDataNeeded += SendDataToClient;
             this.FormClosing += MainWnd_FormClosing;
             serialPort = new SerialCom();
             serialPort.LogNeeded += AppendLog;
             serialPort.DataReceived += OnDataReceived;
             ptLVObject.LogNeeded += AppendLog;
+            tcpServer = new SimpleTcpServer();
+            tcpServer.StringEncoder = Encoding.UTF8;
+            tcpServer.ClientConnected += Server_ClientConnected;
+            tcpServer.ClientDisconnected += Server_ClientDisconnected;
+            tcpServer.DataReceived += Server_DataReceived;
         }
 
         private void MainWnd_FormClosing(object sender, FormClosingEventArgs e)
         {
-            tcpServer?.CloseConnection();
+            tcpServer?.Stop();
             serialPort?.ClosePort();
             serialPort?.Dispose();
         }
@@ -149,6 +154,89 @@ namespace AuthHost
             this.textBox_ISRespCode.Text = "00";
             this.textBox_CurrencyCode.Text = "0978";
             this.textBox_CurrencyExp.Text = "2";
+        }
+
+        private void Server_ClientConnected(object sender, TcpClient e)
+        {
+            AppendLog("$\"New client connected: {((IPEndPoint)e.Client.RemoteEndPoint).Address}");
+        }
+
+        private void Server_ClientDisconnected(object sender, TcpClient e)
+        {
+            AppendLog("$\"New client disconnected: {((IPEndPoint)e.Client.RemoteEndPoint).Address}");
+        }
+        private void Server_DataReceived(object sender, SimpleTCP.Message e)
+        {
+            byte[] data = e.Data;
+            string receivedData = Tool.ByteArrayToBcdString(data);
+            bool needParseTLV = true;
+
+            AppendLog("Recv Data: " + receivedData);
+            AppendLog("Recv Protocol: " + data[1].ToString("X2"));
+            AppendLog("Recv MsgType:" + data[1]);
+
+            if (data.Length == 4)
+            {
+                needParseTLV = false;
+            }
+
+            if (needParseTLV)
+            {
+                byte[] tlvs = new byte[data.Length - 4];
+                Array.Copy(data, 4, tlvs, 0, tlvs.Length);
+                switch (data[1])
+                {
+                    case (byte)MsgType.FINANCE_REQ_RECV:
+                        DealFinanceRequest(tlvs);
+                        break;
+                    case (byte)MsgType.AUTHORIZE_REQ_RECV:
+                        DealAuthorizeRequst(tlvs);
+                        break;
+                    case (byte)MsgType.FINANCE_CONFIRM_RECV:
+                        DealFinanceConfirm(tlvs);
+                        break;
+                    case (byte)MsgType.BATCH_UPLOAD_RECV:
+                        DealBatchUpload(tlvs);
+                        break;
+                    case (byte)MsgType.TRANS_RESULT_RECV:
+                        DealTransResult(tlvs);
+                        break;
+                    case (byte)MsgType.TERM_OUTCOME_RECV:
+                        DealTermOutcome(tlvs);
+                        break;
+                    case (byte)MsgType.SIMDATA_DOWNLOAD_RECV:
+                        DownloadTermParam();
+                        break;
+                    default:
+                        return;
+                }
+            }
+            else
+            {
+                switch (data[1])
+                {
+                    case (byte)MsgType.AID_DOWNLOAD_RECV:
+                        DownloadAID();
+                        break;
+                    case (byte)MsgType.CAPK_DOWNLOAD_RECV:
+                        DownloadCAPK();
+                        break;
+                    case (byte)MsgType.DRL_DOWNLOAD_RECV:
+                        DownloadDRL();
+                        break;
+                    case (byte)MsgType.BLACKLIST_DOWNLOAD_RECV:
+                        DownloadBlacklist();
+                        break;
+                    case (byte)MsgType.REVOKEY_DOWNLOAD_RECV:
+                        DownloadRevokey();
+                        break;
+                    case (byte)MsgType.TRANS_REQ_RECV:
+                        StartTrans();
+                        break;
+                    default:
+                        return;
+                }
+            }
         }
 
         private void LoadConfigList()
@@ -488,13 +576,14 @@ namespace AuthHost
         {
             string ipAddressString = this.comboBox_IPAddr.SelectedItem.ToString();
             int port;
+
             if (int.TryParse(this.textBox_TCPPort.Text, out port) == false)
             {
                 Logger.Instance.Log("Error: cant parse TCP Port from textBox");
                 return;
             }
-
-            tcpServer.Listen(ipAddressString, port);
+            IPAddress iPAddress = IPAddress.Parse(ipAddressString);
+            this.tcpServer.Start(iPAddress, port);
 
             // 禁用按钮，防止多次点击
             button_ListenTCP.Enabled = false;
@@ -508,7 +597,6 @@ namespace AuthHost
         private void button_CloseTCP_Click(object sender, EventArgs e)
         {
             tcpServer.Stop();
-            tcpServer.Dispose();
             serialPort.ClosePort();
 
             // 更新按钮状态
@@ -517,6 +605,15 @@ namespace AuthHost
             //恢复串口相关按钮
             button_ScanSerial.Enabled = true;
             button_OpenSerial.Enabled = true;
+            if(this.CommunicationType == (byte)CommType.TCP)
+            {
+                AppendLog("Close TCP Listening");
+            }
+            else if(this.CommunicationType == (byte)CommType.SERIAL)
+            {
+                AppendLog("Close" + this.comboBox_SerialPort.Text);
+            }
+
             this.CommunicationType = (byte)CommType.UNKNOW;
         }
 
@@ -532,39 +629,57 @@ namespace AuthHost
             }
         }
 
+        public void SendDataToClient(byte[] data)
+        {
+            AppendLog("Cur Communicate Type:" + this.CommunicationType);
+            if (this.CommunicationType == (byte)CommType.SERIAL)
+            {
+                this.serialPort.SendData(data);
+            }
+            else if(this.CommunicationType == (byte)CommType.TCP)
+            {
+                AppendLog("Send TCP Data:" + Tool.HexByteArrayToString(data));
+                this.tcpServer.Broadcast(data);
+            }
+            else
+            {
+                AppendLog("Invalid Communicate Type,Send Data Fail");
+            }
+        }
+
         private void DownloadAID()
         {
-            this.config.DownloadXml(Config.CfgType.CfgAID, this.CommunicationType, this.tcpServer, this.serialPort);
+            this.config.DownloadXml(Config.CfgType.CfgAID);
         }
 
         private void DownloadCAPK()
         {
-            this.config.DownloadXml(Config.CfgType.CfgCAPK, this.CommunicationType, this.tcpServer, this.serialPort);
+            this.config.DownloadXml(Config.CfgType.CfgCAPK);
         }
 
         private void DownloadDRL()
         {
-            this.config.DownloadXml(Config.CfgType.CfgDRL, this.CommunicationType, tcpServer, this.serialPort);
+            this.config.DownloadXml(Config.CfgType.CfgDRL);
         }
 
         private void DownloadExceptionFile()
         {
-            this.config.DownloadXml(Config.CfgType.CfgExcpFile, this.CommunicationType, tcpServer, this.serialPort);
+            this.config.DownloadXml(Config.CfgType.CfgExcpFile);
         }
 
         private void DownloadTermParam()
         {
-            this.config.DownloadXml(Config.CfgType.CfgTermParm, this.CommunicationType, tcpServer, this.serialPort);
+            this.config.DownloadXml(Config.CfgType.CfgTermParm);
         }
 
         private void DownloadRevokey()
         {
-            this.config.DownloadXml(Config.CfgType.CfgRevokey, this.CommunicationType, tcpServer, this.serialPort);
+            this.config.DownloadXml(Config.CfgType.CfgRevokey);
         }
 
         private void DownloadBlacklist()
         {
-            this.config.DownloadXml(Config.CfgType.CfgExcpFile, this.CommunicationType, tcpServer, this.serialPort);
+            this.config.DownloadXml(Config.CfgType.CfgExcpFile);
         }
 
         private void StartTrans()
@@ -701,11 +816,11 @@ namespace AuthHost
 
             sendData[3] = (byte)sendLen;
 
-            AppendLog("Send Data: "+Tool.HexByteArrayToString(sendData));
+            //AppendLog("Send Data: "+Tool.HexByteArrayToString(sendData));
 
             if(this.CommunicationType == (byte)CommType.TCP)
             {
-                this.tcpServer.SendData(sendData);
+                this.tcpServer.Broadcast(sendData);
             }
             else if(this.CommunicationType == (byte)CommType.SERIAL)
             {
@@ -780,7 +895,7 @@ namespace AuthHost
                 sendData = "02" + "01" + high.ToString("X2") + low.ToString("X2") + sendData;
                 if(this.CommunicationType == (byte)CommType.TCP)
                 {
-                    this.tcpServer.SendData(Tool.StringToHexByteArray(sendData));
+                    this.tcpServer.Broadcast(Tool.StringToHexByteArray(sendData));
                 }
                 else if(this.CommunicationType == (byte)CommType.SERIAL)
                 {
@@ -857,7 +972,7 @@ namespace AuthHost
 
                 if (this.CommunicationType == (byte)CommType.TCP)
                 {
-                    this.tcpServer.SendData(Tool.StringToHexByteArray(sendData));
+                    this.tcpServer.Broadcast(Tool.StringToHexByteArray(sendData));
                 }
                 else if (this.CommunicationType == (byte)CommType.SERIAL)
                 {
@@ -1328,35 +1443,35 @@ namespace AuthHost
             {
                 if (tmp == "00")
                 {
-                    AppendLog("Status:  NOT READY\n");
+                    AppendLog("Status:  NOT READY");
                 }
                 else if (tmp == "01")
                 {
-                    AppendLog("Status:  IDLE\n");
+                    AppendLog("Status:  IDLE");
                 }
                 else if (tmp == "02")
                 {
-                    AppendLog("Status:  READY TO READ\n");
+                    AppendLog("Status:  READY TO READ");
                 }
                 else if (tmp == "03")
                 {
-                    AppendLog("Status:  PROCESSING\n");
+                    AppendLog("Status:  PROCESSING");
                 }
                 else if (tmp == "04")
                 {
-                    AppendLog("Status:  CARD READ SUCCESSFULLY\n");
+                    AppendLog("Status:  CARD READ SUCCESSFULLY");
                 }
                 else if (tmp == "05")
                 {
-                    AppendLog("Status:  PROCESSING ERROR\n");
+                    AppendLog("Status:  PROCESSING ERROR");
                 }
                 else if (tmp == "FF")
                 {
-                    AppendLog("Status:  N/A\n");
+                    AppendLog("Status:  N/A");
                 }
                 else
                 {
-                    AppendLog("Status:  Invalid Data\n");
+                    AppendLog("Status:  Invalid Data");
                 }
 
             }
@@ -1616,36 +1731,32 @@ namespace AuthHost
 
         private void DealTermOutcome(byte[] tlvs)
         {
-            AppendLog("Start DealTermOutcome");
+            //AppendLog("Start DealTermOutcome");
             string s = Tool.HexByteArrayToString(tlvs);
-            AppendLog("After HexByteArrayToString s:" + s);
+            //AppendLog("After HexByteArrayToString s:" + s);
             TLVObject tLVObject = new TLVObject();
-            AppendLog("Parse TLV result:" + tLVObject.parse_tlvstring(s));
+            //AppendLog("Parse TLV result:" + tLVObject.parse_tlvstring(s));
             if (tLVObject.parse_tlvstring(s))
             {
                 if(tLVObject.Exist("DF8129"))
                 {
                     AppendLog("________________________________________________");
                     ShowTransOutcome(tLVObject.Get("DF8129"));
-                    AppendLog("________________________________________________");
                 }
                 if (tLVObject.Exist("DF8116"))
                 {
                     AppendLog("________________________________________________");
                     ShowUIRequest(tLVObject.Get("DF8116"), false);
-                    AppendLog("________________________________________________");
                 }
                 if (tLVObject.Exist("DF8117"))
                 {
                     AppendLog("________________________________________________");
                     ShowUIRequest(tLVObject.Get("DF8117"), true);
-                    AppendLog("________________________________________________");
                 }
                 if (tLVObject.Exist("FF8105"))
                 {
                     AppendLog("________________________________________________");
                     ShowDataRecord(tLVObject.Get("FF8105"));
-                    AppendLog("________________________________________________");
                 }
             }
         }
@@ -1677,9 +1788,9 @@ namespace AuthHost
             string receivedData = Tool.ByteArrayToBcdString(data);
             bool needParseTLV = true;
 
-            AppendLog("Recv Data: "+ receivedData);
-            AppendLog("Recv Protocol: " + data[1].ToString("X2"));
-            AppendLog("Recv MsgType:" + data[1]);
+            //AppendLog("Recv Data: "+ receivedData);
+            //AppendLog("Recv Protocol: " + data[1].ToString("X2"));
+            //AppendLog("Recv MsgType:" + data[1]);
 
             if(data.Length == 4)
             {

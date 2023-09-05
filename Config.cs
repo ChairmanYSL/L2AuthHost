@@ -14,6 +14,8 @@ namespace AuthHost
     {
         public delegate void LogDelegate(string message);
         public event LogDelegate LogNeeded;
+        public delegate void SendDataDelegate(byte[] data);
+        public event SendDataDelegate SendDataNeeded;
         public string AIDCfgName;
         public string CAPKCfgName;
         public string DRLCfgName;
@@ -241,7 +243,7 @@ namespace AuthHost
                         files = Directory.GetFiles(directoryPath);
                         docAID.Load(files[index]);
                         //Logger.Instance.Log("Load AID File:" + files[index]);
-                        LogNeeded?.Invoke("Load AID File:" + files[index]);
+                        //LogNeeded?.Invoke("Load AID File:" + files[index]);
                         XmlNode root = docAID.DocumentElement;
                         AIDNum = root.ChildNodes.Count;
                         LogNeeded?.Invoke("AID Num:" + AIDNum);
@@ -255,7 +257,7 @@ namespace AuthHost
                         files = Directory.GetFiles(directoryPath);
                         docCAPK.Load(files[index]);
                         //Logger.Instance.Log("Load CAPK File:" + files[index]);
-                        LogNeeded?.Invoke("Load CAPK File:" + files[index]);
+                        //LogNeeded?.Invoke("Load CAPK File:" + files[index]);
                         XmlNode root = docCAPK.DocumentElement;
                         CAPKNum = root.ChildNodes.Count;
                         LogNeeded?.Invoke("CAPK Num:" + CAPKNum);
@@ -325,7 +327,7 @@ namespace AuthHost
             }
         }
 
-        public void DownloadXml(CfgType type, byte commuType, TCPServer tcpServer, SerialCom serialCom)
+        public void DownloadXml(CfgType type)
         {
             byte[] bytes = new byte[2044];
             byte[] sendData;
@@ -340,7 +342,7 @@ namespace AuthHost
                 case CfgType.CfgAID:
                     root = docAID.DocumentElement;
                     XmlNode aidnode = root.FirstChild;
-                    LogNeeded?.Invoke("Cur AID Index:" + curAIDIndex);
+                    //LogNeeded?.Invoke("Cur AID Index:" + curAIDIndex);
                     if(curAIDIndex == AIDNum)
                     {
                         LogNeeded?.Invoke("Finish Download AID");
@@ -391,12 +393,12 @@ namespace AuthHost
                         }
                     }
                     len = s.Length;
-                    LogNeeded?.Invoke("s.Length: " + len);
+                    //LogNeeded?.Invoke("s.Length: " + len);
 
                     high = (byte)(((len / 2) >> 8) & 0xFF);
                     low = (byte)((len / 2) & 0xFF);
 
-                    LogNeeded?.Invoke("s: " + s);
+                    //LogNeeded?.Invoke("s: " + s);
                     bytes = Tool.StringToBCD(s);
 
                     sendData = new byte[len / 2 + 4];
@@ -407,14 +409,14 @@ namespace AuthHost
                     sendData[3] = low;
 
                     Logger.Instance.Log("Send Data: " + Tool.ByteArrayToBcdString(sendData));
-                    LogNeeded?.Invoke("Send Data: " + Tool.ByteArrayToBcdString(sendData));
+                    //LogNeeded?.Invoke("Send Data: " + Tool.ByteArrayToBcdString(sendData));
                     curAIDIndex++;
                     break;
 
                 case CfgType.CfgCAPK:
                     root = docCAPK.DocumentElement;
                     XmlNode capknode = root.FirstChild;
-                    LogNeeded?.Invoke("Cur CAPK Index:" + curCAPKIndex);
+                    //LogNeeded?.Invoke("Cur CAPK Index:" + curCAPKIndex);
                     if (curCAPKIndex == CAPKNum)
                     {
                         LogNeeded?.Invoke("Finish Download CAPK");
@@ -466,12 +468,12 @@ namespace AuthHost
                     }
       
                     len = s.Length;
-                    LogNeeded?.Invoke("s.Length: " + len);
+                    //LogNeeded?.Invoke("s.Length: " + len);
 
                     high = (byte)(((len/2) >> 8) & 0xFF);
                     low = (byte)((len/2) & 0xFF);
 
-                    LogNeeded?.Invoke("s: " + s);
+                    //LogNeeded?.Invoke("s: " + s);
                     bytes = Tool.StringToBCD(s);
 
                     sendData = new byte[len / 2 + 4];
@@ -482,14 +484,14 @@ namespace AuthHost
                     sendData[3] = low;
 
                     Logger.Instance.Log("Send Data: " + Tool.ByteArrayToBcdString(sendData));
-                    LogNeeded?.Invoke("Send Data: " + Tool.ByteArrayToBcdString(sendData));
+                    //LogNeeded?.Invoke("Send Data: " + Tool.ByteArrayToBcdString(sendData));
                     curCAPKIndex++;
                     break;
 
                 case CfgType.CfgDRL:
                     root = docDRL.DocumentElement;
                     XmlNode drlnode = root.FirstChild;
-                    LogNeeded?.Invoke("Cur DRL Index:" + curDRLIndex);
+                    //LogNeeded?.Invoke("Cur DRL Index:" + curDRLIndex);
                     if(curDRLIndex == DRLNum)
                     {
                         LogNeeded?.Invoke("Finish Download DRL");
@@ -537,12 +539,12 @@ namespace AuthHost
                     }
 
                     len = s.Length;
-                    LogNeeded?.Invoke("s.Length: " + len);
+                    //LogNeeded?.Invoke("s.Length: " + len);
 
                     high = (byte)(((len / 2) >> 8) & 0xFF);
                     low = (byte)((len / 2) & 0xFF);
 
-                    LogNeeded?.Invoke("s: " + s);
+                    //LogNeeded?.Invoke("s: " + s);
                     bytes = Tool.StringToBCD(s);
 
                     sendData = new byte[len / 2 + 4];
@@ -553,14 +555,14 @@ namespace AuthHost
                     sendData[3] = low;
 
                     Logger.Instance.Log("Send Data: " + Tool.ByteArrayToBcdString(sendData));
-                    LogNeeded?.Invoke("Send Data: " + Tool.ByteArrayToBcdString(sendData));
+                    //LogNeeded?.Invoke("Send Data: " + Tool.ByteArrayToBcdString(sendData));
                     curDRLIndex++;
                     break;
 
                 case CfgType.CfgExcpFile:
                     root = docExcpfile.DocumentElement;
                     XmlNode excpnode = root.FirstChild;
-                    LogNeeded?.Invoke("Cur ExcpFile Index:" + curExcpFileIndex);
+                    //LogNeeded?.Invoke("Cur ExcpFile Index:" + curExcpFileIndex);
                     if(curExcpFileIndex == ExcpFileNum)
                     {
                         LogNeeded?.Invoke("Finish Download Excption File");
@@ -606,12 +608,12 @@ namespace AuthHost
                         }
                     }
                     len = s.Length;
-                    LogNeeded?.Invoke("s.Length: " + len);
+                    //LogNeeded?.Invoke("s.Length: " + len);
 
                     high = (byte)(((len / 2) >> 8) & 0xFF);
                     low = (byte)((len / 2) & 0xFF);
 
-                    LogNeeded?.Invoke("s: " + s);
+                    //LogNeeded?.Invoke("s: " + s);
                     bytes = Tool.StringToBCD(s);
 
                     sendData = new byte[len / 2 + 4];
@@ -622,14 +624,14 @@ namespace AuthHost
                     sendData[3] = low;
 
                     Logger.Instance.Log("Send Data: " + Tool.ByteArrayToBcdString(sendData));
-                    LogNeeded?.Invoke("Send Data: " + Tool.ByteArrayToBcdString(sendData));
+                    //LogNeeded?.Invoke("Send Data: " + Tool.ByteArrayToBcdString(sendData));
                     curExcpFileIndex++;
                     break;
 
                 case CfgType.CfgRevokey:
                     root = docRevokey.DocumentElement;
                     XmlNode revokeynode = root.FirstChild;
-                    LogNeeded?.Invoke("Cur RevoKey Index:" + curRevokeyIndex);
+                    //LogNeeded?.Invoke("Cur RevoKey Index:" + curRevokeyIndex);
                     if(curRevokeyIndex == RevokeyNum)
                     {
                         LogNeeded?.Invoke("Finish Download Revokey");
@@ -676,12 +678,12 @@ namespace AuthHost
                     }
 
                     len = s.Length;
-                    LogNeeded?.Invoke("s.Length: " + len);
+                    //LogNeeded?.Invoke("s.Length: " + len);
 
                     high = (byte)(((len / 2) >> 8) & 0xFF);
                     low = (byte)((len / 2) & 0xFF);
 
-                    LogNeeded?.Invoke("s: " + s);
+                    //LogNeeded?.Invoke("s: " + s);
                     bytes = Tool.StringToBCD(s);
 
                     sendData = new byte[len / 2 + 4];
@@ -692,14 +694,14 @@ namespace AuthHost
                     sendData[3] = low;
 
                     Logger.Instance.Log("Send Data: " + Tool.ByteArrayToBcdString(sendData));
-                    LogNeeded?.Invoke("Send Data: " + Tool.ByteArrayToBcdString(sendData));
+                    //LogNeeded?.Invoke("Send Data: " + Tool.ByteArrayToBcdString(sendData));
                     curRevokeyIndex++;
                     break;
 
                 case CfgType.CfgTermParm:
                     root = docTermparam.DocumentElement;
                     XmlNode termparnode = root.FirstChild;
-                    LogNeeded?.Invoke("Cur TermPar Index:" + curTermParIndex);
+                    //LogNeeded?.Invoke("Cur TermPar Index:" + curTermParIndex);
                     if(curTermParIndex == TermParNum)
                     {
                         LogNeeded?.Invoke("Finish Download Term Param");
@@ -744,12 +746,12 @@ namespace AuthHost
                         }
                     }
 
-                    LogNeeded?.Invoke("s.Length: " + len);
+                    //LogNeeded?.Invoke("s.Length: " + len);
 
                     high = (byte)(((len / 2) >> 8) & 0xFF);
                     low = (byte)((len / 2) & 0xFF);
 
-                    LogNeeded?.Invoke("s: " + s);
+                    //LogNeeded?.Invoke("s: " + s);
                     bytes = Tool.StringToBCD(s);
 
                     sendData = new byte[len / 2 + 4];
@@ -760,7 +762,7 @@ namespace AuthHost
                     sendData[3] = low;
 
                     Logger.Instance.Log("Send Data: " + Tool.ByteArrayToBcdString(sendData));
-                    LogNeeded?.Invoke("Send Data: " + Tool.ByteArrayToBcdString(sendData));
+                    //LogNeeded?.Invoke("Send Data: " + Tool.ByteArrayToBcdString(sendData));
                     curTermParIndex++;
                     break;
 
@@ -768,22 +770,7 @@ namespace AuthHost
                     return ;
             }
 
-            if(commuType == (byte)MainWnd.CommType.TCP)
-            {
-                if (tcpServer != null && sendData != null)
-                {
-                    tcpServer.SendData(sendData);
-                }
-            }
-            else if(commuType == (byte)MainWnd.CommType.SERIAL)
-            {
-                if(serialCom != null && sendData != null)
-                {
-                    serialCom.SendData(sendData);
-                }
-            }
-
-
+            SendDataNeeded?.Invoke(sendData);
         }        
     }
 
