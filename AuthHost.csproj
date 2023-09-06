@@ -75,11 +75,16 @@
     <ApplicationIcon>Checkmat2.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="NLog, Version=5.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
+      <HintPath>packages\NLog.5.2.3\lib\net45\NLog.dll</HintPath>
+    </Reference>
     <Reference Include="SimpleTCP, Version=1.0.24.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\SimpleTCP.1.0.24\lib\net45\SimpleTCP.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.IO.Compression" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -92,8 +97,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AlertHelper.cs" />
+    <Compile Include="CheckableMenuItem.cs" />
     <Compile Include="Config.cs" />
-    <Compile Include="Logger.cs" />
     <Compile Include="MainWnd.cs">
       <SubType>Form</SubType>
     </Compile>

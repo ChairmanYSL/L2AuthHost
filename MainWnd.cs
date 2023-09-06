@@ -13,10 +13,12 @@ using System.Linq;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using System.Runtime.CompilerServices;
 using SimpleTCP;
+using NLog;
+using NLog.Targets;
 
 namespace AuthHost
 {
-    public partial class MainWnd : Form
+    public partial class MainWnd : Form, CheckableMenuItem
     {
         // 定义一个静态的 MainWnd 对象
         string curDir = Application.StartupPath;
@@ -27,6 +29,18 @@ namespace AuthHost
         private byte CommunicationType;
         private TLVObject ptLVObject = new TLVObject();
         private SimpleTcpServer tcpServer;
+        public static ILogger Logger { get; private set; }
+        public bool IsLogShowScreenEnabled 
+        { 
+            get { return this.ToolStripMenuItem_ShowLogScreen.Checked; }
+            set {  this.ToolStripMenuItem_ShowLogScreen.Checked = value;}
+        }
+
+        public bool IsLogWriteFileEnabled
+        {
+            get { return this.ToolStripMenuItem_WriteLog.Checked; }
+            set { this.ToolStripMenuItem_WriteLog.Checked = value; }
+        }
 
         private enum MsgType
         {
@@ -81,10 +95,11 @@ namespace AuthHost
         public MainWnd()
         {
             InitializeComponent();
-            Logger.Instance.SetEnabled(true);
-            this.openToolStripMenuItem1.Checked = true;
+            Logger = LogManager.GetCurrentClassLogger();
+            this.ToolStripMenuItem_ShowLogScreen.Checked = true;
             config.LogNeeded += AppendLog;
             config.SendDataNeeded += SendDataToClient;
+            config.MessageNeeded += ShowMessage;
             this.FormClosing += MainWnd_FormClosing;
             serialPort = new SerialCom();
             serialPort.LogNeeded += AppendLog;
@@ -95,6 +110,8 @@ namespace AuthHost
             tcpServer.ClientConnected += Server_ClientConnected;
             tcpServer.ClientDisconnected += Server_ClientDisconnected;
             tcpServer.DataReceived += Server_DataReceived;
+            IsLogWriteFileEnabled = true;
+            IsLogShowScreenEnabled = false;
         }
 
         private void MainWnd_FormClosing(object sender, FormClosingEventArgs e)
@@ -107,7 +124,7 @@ namespace AuthHost
         private void Form1_Load(object sender, EventArgs e)
         {
             this.Size = new System.Drawing.Size(1317, 717);
-            UpdateMess("Welcome");
+            ShowMessage("Welcome");
             LoadBaudComboBox();
             LoadCommunicateSettings();
             LoadConfigList();
@@ -119,15 +136,15 @@ namespace AuthHost
         {
             this.textBox_TCPPort.Text = "8182";
             string hostName = Dns.GetHostName();
-            Logger.Instance.Log("Cur host name: " + hostName);
+            Logger.Info("Cur host name: " + hostName);
             IPHostEntry hostEntry = Dns.GetHostEntry(hostName);
-            Logger.Instance.Log("IP Address in local computer: ");
+            Logger.Info("IP Address in local computer: ");
             List<string> IPAddrList = new List<string>();
             foreach (IPAddress ip in hostEntry.AddressList)
             {
                 if (ip.AddressFamily == AddressFamily.InterNetwork)  // IPv4地址
                 {
-                    Logger.Instance.Log(ip.ToString());
+                    Logger.Info(ip.ToString());
                     IPAddrList.Add(ip.ToString());
                 }
             }
@@ -158,12 +175,12 @@ namespace AuthHost
 
         private void Server_ClientConnected(object sender, TcpClient e)
         {
-            AppendLog("$\"New client connected: {((IPEndPoint)e.Client.RemoteEndPoint).Address}");
+            ShowMessage($"New client connected: {((IPEndPoint)e.Client.RemoteEndPoint).Address}");
         }
 
         private void Server_ClientDisconnected(object sender, TcpClient e)
         {
-            AppendLog("$\"New client disconnected: {((IPEndPoint)e.Client.RemoteEndPoint).Address}");
+            ShowMessage($"New client disconnected: {((IPEndPoint)e.Client.RemoteEndPoint).Address}");
         }
         private void Server_DataReceived(object sender, SimpleTCP.Message e)
         {
@@ -241,20 +258,20 @@ namespace AuthHost
 
         private void LoadConfigList()
         {
-            Logger.Instance.Log("curDir: " + curDir);
+            Logger.Info("curDir: " + curDir);
 
             this.config.initDir(curDir);
             this.config.initBrand();
 
             //this.comboBox_Brand.DataSource = config.BrandList;
             UpdateBrand(config.BrandList);
-            Logger.Instance.Log("comboBox_Brand.Items.Count: " + comboBox_Brand.Items.Count);
+            Logger.Info("comboBox_Brand.Items.Count: " + comboBox_Brand.Items.Count);
             if (this.comboBox_Brand.Items.Count > 0)
             {
                 this.comboBox_Brand.SelectedIndex = 0;
             }
 
-            Logger.Instance.Log("comboBox_Brand.SelectedIndex: " + this.comboBox_Brand.SelectedIndex);
+            Logger.Info("comboBox_Brand.SelectedIndex: " + this.comboBox_Brand.SelectedIndex);
             this.config.SetBrandLocaliton(this.comboBox_Brand.SelectedItem.ToString());
 
             this.config.initConfig();
@@ -426,17 +443,6 @@ namespace AuthHost
             }
         }
 
-        public void UpdateMess(string msg)
-        {
-            Logger.Instance.Log(msg);
-            this.richTextBox_Message.AppendText(msg + "\r\n");
-        }
-
-        public void UpdateMessNolog(string msg)
-        {
-            this.richTextBox_Message.AppendText(msg + "\r\n");
-        }
-
         private void comboBox_Brand_SelectedIndexChanged(object sender, EventArgs e)
         {
             string curBrand = this.comboBox_Brand.SelectedItem.ToString();
@@ -472,21 +478,27 @@ namespace AuthHost
                 comboBox_TermParmCfg.SelectedIndex = 0;
             }
         }
-        private void openToolStripMenuItem1_Click(object sender, EventArgs e)
+        private void ToolStripMenuItem_ShowLogScreen_Click(object sender, EventArgs e)
         {
-            Logger.Instance.SetEnabled(true);
-            this.openToolStripMenuItem1.Checked = true;
+            IsLogShowScreenEnabled = !IsLogShowScreenEnabled;
         }
 
-        private void closeToolStripMenuItem1_Click(object sender, EventArgs e)
+        private void ToolStripMenuItem_WriteLog_Click(object sender, EventArgs e)
         {
-            Logger.Instance.SetEnabled(false);
-            this.closeToolStripMenuItem1.Checked = false;
+            IsLogWriteFileEnabled = !IsLogWriteFileEnabled;
+            if(IsLogWriteFileEnabled == false)
+            {
+                DisableLogging();
+            }
+            else
+            {
+                EnableLogging();
+            }
         }
 
         public string GetCurBrand()
         {
-            Logger.Instance.Log("comboBox_Brand.SelectedItem: " + comboBox_Brand.SelectedItem);
+            Logger.Info("comboBox_Brand.SelectedItem: " + comboBox_Brand.SelectedItem);
             if (this.comboBox_Brand.SelectedItem != null)
             {
                 return this.comboBox_Brand.SelectedItem.ToString();
@@ -534,42 +546,36 @@ namespace AuthHost
         {
             this.config.LoadXml(Config.CfgType.CfgAID, this.comboBox_AIDCfg.SelectedIndex);
             string[] files = Directory.GetFiles(this.config.AIDCfgName);
-            //UpdateMessNolog("Load AID File:" + files[this.comboBox_AIDCfg.SelectedIndex]);
         }
 
         private void button_CAPKDownld_Click(object sender, EventArgs e)
         {
             this.config.LoadXml(Config.CfgType.CfgCAPK, this.comboBox_CAPKCfg.SelectedIndex);
             string[] files = Directory.GetFiles(this.config.CAPKCfgName);
-            //UpdateMessNolog("Load CAPK File:" + files[this.comboBox_CAPKCfg.SelectedIndex]);
         }
 
         private void button_ExcpFileDownld_Click(object sender, EventArgs e)
         {
             this.config.LoadXml(Config.CfgType.CfgExcpFile, this.comboBox_ExcpFileCfg.SelectedIndex);
             string[] files = Directory.GetFiles(this.config.ExcpFileCfgName);
-            //UpdateMessNolog("Load Excption File:" + files[this.comboBox_ExcpFileCfg.SelectedIndex]);
         }
 
         private void button_DRLDownld_Click(object sender, EventArgs e)
         {
             this.config.LoadXml(Config.CfgType.CfgDRL, this.comboBox_DRLCfg.SelectedIndex);
             string[] files = Directory.GetFiles(this.config.DRLCfgName);
-            //UpdateMessNolog("Load DRL File:" + files[this.comboBox_DRLCfg.SelectedIndex]);
         }
 
         private void button_TermParmDownld_Click(object sender, EventArgs e)
         {
             this.config.LoadXml(Config.CfgType.CfgTermParm, this.comboBox_TermParmCfg.SelectedIndex);
             string[] files = Directory.GetFiles(this.config.TermParCfgName);
-            //UpdateMessNolog("Load Term Param File:" + files[this.comboBox_TermParmCfg.SelectedIndex]);
         }
 
         private void button_RevoKeyDownld_Click(object sender, EventArgs e)
         {
             this.config.LoadXml(Config.CfgType.CfgRevokey, this.comboBox_RevoKeyCfg.SelectedIndex);
             string[] files = Directory.GetFiles(this.config.RevokeyCfgName);
-            //UpdateMessNolog("Load Revokey File:" + files[this.comboBox_RevoKeyCfg.SelectedIndex]);
         }
 
         private void button_ListenTCP_Click(object sender, EventArgs e)
@@ -579,7 +585,7 @@ namespace AuthHost
 
             if (int.TryParse(this.textBox_TCPPort.Text, out port) == false)
             {
-                Logger.Instance.Log("Error: cant parse TCP Port from textBox");
+                Logger.Info("Error: cant parse TCP Port from textBox");
                 return;
             }
             IPAddress iPAddress = IPAddress.Parse(ipAddressString);
@@ -607,26 +613,31 @@ namespace AuthHost
             button_OpenSerial.Enabled = true;
             if(this.CommunicationType == (byte)CommType.TCP)
             {
-                AppendLog("Close TCP Listening");
+                ShowMessage("Close TCP Listening");
             }
             else if(this.CommunicationType == (byte)CommType.SERIAL)
             {
-                AppendLog("Close" + this.comboBox_SerialPort.Text);
+                ShowMessage("Close" + this.comboBox_SerialPort.Text);
             }
 
             this.CommunicationType = (byte)CommType.UNKNOW;
         }
 
-        public void AppendLog(string logMessage)
+        public void ShowMessage(string message)
         {
             if (this.richTextBox_Message.InvokeRequired)
             {
-                richTextBox_Message.Invoke(new Action<string>(AppendLog), logMessage);
+                richTextBox_Message.Invoke(new Action<string>(ShowMessage), message);
             }
             else
             {
-                this.richTextBox_Message.AppendText(logMessage + Environment.NewLine);
+                this.richTextBox_Message.AppendText(message + Environment.NewLine);
             }
+        }
+
+        public void AppendLog(string logMessage)
+        {
+            Logger.Info(logMessage);
         }
 
         public void SendDataToClient(byte[] data)
@@ -720,8 +731,8 @@ namespace AuthHost
             if(this.checkBox_AmtPres.Checked)
             {
                 transAmt = transAmt.Replace(".", "");
-                AppendLog($"transAmt after Replace: {transAmt}");
-                AppendLog($"transAmt.Length: {transAmt.Length}");
+                Logger.Info($"transAmt after Replace: {transAmt}");
+                Logger.Info($"transAmt.Length: {transAmt.Length}");
                 if (transAmt.Length < 12)
                 {
                     tmpLen = transAmt.Length;
@@ -730,7 +741,7 @@ namespace AuthHost
                         transAmt = transAmt.Insert(0, "0");
                     }
                 }
-                AppendLog("Current Trans Amount 9F02:" + transAmt);
+                ShowMessage("Current Trans Amount 9F02:" + transAmt);
 
             }
 
@@ -745,13 +756,13 @@ namespace AuthHost
                         transAmtOth = transAmtOth.Insert(0, "0");
                     }
                 }
-                AppendLog("Current Trans Amount Other 9F03:" + transAmtOth);
+                ShowMessage("Current Trans Amount Other 9F03:" + transAmtOth);
 
             }
 
             if(this.checkBox_TransTypePres.Checked)
             {
-                AppendLog("Current Trans Type 9C:" + transType);
+                ShowMessage("Current Trans Type 9C:" + transType);
             }
 
             byte[] sendData = new byte[64];
@@ -816,7 +827,7 @@ namespace AuthHost
 
             sendData[3] = (byte)sendLen;
 
-            //AppendLog("Send Data: "+Tool.HexByteArrayToString(sendData));
+            Logger.Info("Send Data: "+Tool.HexByteArrayToString(sendData));
 
             if(this.CommunicationType == (byte)CommType.TCP)
             {
@@ -828,7 +839,7 @@ namespace AuthHost
             }
             else
             {
-                AppendLog("Error: Current Communicate Type is Null");
+                Logger.Info("Error: Current Communicate Type is Null");
             }
         }
 
@@ -840,7 +851,7 @@ namespace AuthHost
             {
                 byte[] tmp = new byte[tlvs[index+1]];
                 Array.Copy(tlvs, index + 2, tmp, 0, tmp.Length);
-                AppendLog("Online Encrypted PIN:" + Tool.HexByteArrayToString(tmp));
+                ShowMessage("Online Encrypted PIN:" + Tool.HexByteArrayToString(tmp));
             }
 
             if(this.comboBox_Brand.SelectedItem.ToString() == "ExpressPay")
@@ -849,12 +860,12 @@ namespace AuthHost
                 {
                     byte[] tmp = new byte[tlvs[index + 1]];
                     Array.Copy(tlvs, index + 2, tmp, 0, tmp.Length);
-                    AppendLog("Track 1 Data:"+Tool.HexByteArrayToString(tmp));
+                    ShowMessage("Track 1 Data:"+Tool.HexByteArrayToString(tmp));
                 }
                 if(TLVObject.ContainsSequence(tlvs,(byte)0x9F, (byte)0x5B))
                 {
                     byte[] tmp = TLVObject.GetTLVValue(tlvs, (byte)0x9F, (byte)0x6B);
-                    AppendLog("Track 2 Equivalent Data:" + Tool.HexByteArrayToString(tmp));
+                    ShowMessage("Track 2 Equivalent Data:" + Tool.HexByteArrayToString(tmp));
                 }
             }
 
@@ -869,7 +880,7 @@ namespace AuthHost
             {
                 sendData += "8A02";
                 sendData += respCode;
-                AppendLog("Current Response Code 8A:" + respCode);
+                ShowMessage("Current Response Code 8A:" + respCode);
             }
             if(authData != null)
             {
@@ -877,7 +888,7 @@ namespace AuthHost
                 len = authData.Length / 2;
                 sendData += len.ToString("X2");
                 sendData += authData;
-                AppendLog("Current Authorization Response Code 91:" + authData);
+                ShowMessage("Current Authorization Response Code 91:" + authData);
             }
             if(script != null)
             {
@@ -885,7 +896,7 @@ namespace AuthHost
                 len = script.Length / 2;
                 sendData += len.ToString("X2");
                 sendData += script;
-                AppendLog("Current Script 71:" + script);
+                ShowMessage("Current Script 71:" + script);
             }
 
             if(sendData.Length > 0)
@@ -916,7 +927,7 @@ namespace AuthHost
             {
                 byte[] tmp = new byte[tlvs[index + 1]];
                 Array.Copy(tlvs, index + 2, tmp, 0, tmp.Length);
-                AppendLog("Online Encrypted PIN:" + Tool.HexByteArrayToString(tmp));
+                ShowMessage("Online Encrypted PIN:" + Tool.HexByteArrayToString(tmp));
             }
 
             if (this.comboBox_Brand.SelectedItem.ToString() == "ExpressPay")
@@ -925,12 +936,12 @@ namespace AuthHost
                 {
                     byte[] tmp = new byte[tlvs[index + 1]];
                     Array.Copy(tlvs, index + 2, tmp, 0, tmp.Length);
-                    AppendLog("Track 1 Data:" + Tool.HexByteArrayToString(tmp));
+                    ShowMessage("Track 1 Data:" + Tool.HexByteArrayToString(tmp));
                 }
                 if (TLVObject.ContainsSequence(tlvs, (byte)0x9F, (byte)0x5B))
                 {
                     byte[] tmp = TLVObject.GetTLVValue(tlvs, (byte)0x9F, (byte)0x6B);
-                    AppendLog("Track 2 Equivalent Data:" + Tool.HexByteArrayToString(tmp));
+                    ShowMessage("Track 2 Equivalent Data:" + Tool.HexByteArrayToString(tmp));
                 }
             }
 
@@ -945,7 +956,7 @@ namespace AuthHost
             {
                 sendData += "8A02";
                 sendData += respCode;
-                AppendLog("Current Response Code 8A:" + respCode);
+                ShowMessage("Current Response Code 8A:" + respCode);
             }
             if (authData != null)
             {
@@ -953,7 +964,7 @@ namespace AuthHost
                 len = authData.Length / 2;
                 sendData += len.ToString("X2");
                 sendData += authData;
-                AppendLog("Current Authorization Response Code 91:" + authData);
+                ShowMessage("Current Authorization Response Code 91:" + authData);
             }
             if (script != null)
             {
@@ -961,7 +972,7 @@ namespace AuthHost
                 len = script.Length / 2;
                 sendData += len.ToString("X2");
                 sendData += script;
-                AppendLog("Current Script 71:" + script);
+                ShowMessage("Current Script 71:" + script);
             }
 
             if (sendData.Length > 0)
@@ -988,12 +999,12 @@ namespace AuthHost
         private void DealBatchUpload(byte[] tlvs)
         {
             TLVObject tLVObject = new TLVObject();
-            AppendLog("Batch Up Record:");
+            ShowMessage("Batch Up Record:");
             if (tLVObject.parse_tlvBCD(tlvs, tlvs.Length))
             {
                 foreach(KeyValuePair<string, string> kvp in tLVObject.tlvDic)
                 {
-                    AppendLog(kvp.Key +": " + kvp.Value);
+                    ShowMessage(kvp.Key +": " + kvp.Value);
                 }
             }
             else
@@ -1012,11 +1023,11 @@ namespace AuthHost
                 case "Discover":
                     if(result == "61")
                     {
-                        AppendLog("TransResult:  Offline Approved");
+                        ShowMessage("TransResult:  Offline Approved");
                     }
                     else if(result == "62")
                     {
-                        AppendLog("TransResult:  Offline Declined");
+                        ShowMessage("TransResult:  Offline Declined");
                     }
                     else if(result == "63")
                     {
@@ -1032,89 +1043,89 @@ namespace AuthHost
         {
             string tmp = "";
             tmp = outcome.Substring(0, 2);
-            AppendLog("TransOutcome: ");
+            ShowMessage("TransOutcome: ");
 
             if(tmp == "10")
             {
-                AppendLog("Status:  Approved");
+                ShowMessage("Status:  Approved");
             }
             else if(tmp == "20")
             {
-                AppendLog("Status:  Declined");
+                ShowMessage("Status:  Declined");
             }
             else if(tmp == "30")
             {
-                AppendLog("Status:  Online Request");
+                ShowMessage("Status:  Online Request");
             }
             else if(tmp == "40")
             {
-                AppendLog("Status:  End Application");
+                ShowMessage("Status:  End Application");
             }
             else if(tmp == "50")
             {
-                AppendLog("Status:  Select Next");
+                ShowMessage("Status:  Select Next");
             }
             else if(tmp == "60")
             {
-                AppendLog("Status:  Try Another Interface");
+                ShowMessage("Status:  Try Another Interface");
             }
             else if(tmp == "70")
             {
-                AppendLog("Status:  Try Again");
+                ShowMessage("Status:  Try Again");
             }
             else if(tmp == "A0")
             {
-                AppendLog("Status:  End Application (with restart – communication error)");
+                ShowMessage("Status:  End Application (with restart – communication error)");
             }
             else if(tmp == "B0")
             {
-                AppendLog("Status:  End Application (with restart - On-Device CVM)");
+                ShowMessage("Status:  End Application (with restart - On-Device CVM)");
             }
             else if(tmp == "C0")
             {
-                AppendLog("Status:  Online Request (Two Presentments)");
+                ShowMessage("Status:  Online Request (Two Presentments)");
             }
             else if(tmp == "D0")
             {
-                AppendLog("Status:  Online Request (Present and Hold)");
+                ShowMessage("Status:  Online Request (Present and Hold)");
             }
             else if(tmp == "F0")
             {
-                AppendLog("Status:  Online Request (No Additional Tap)");
+                ShowMessage("Status:  Online Request (No Additional Tap)");
             }
             else if(tmp == "FF")
             {
-                AppendLog("Status:  N/A");
+                ShowMessage("Status:  N/A");
             }
             else
             {
-                AppendLog("Status:  Invalid Data");
+                ShowMessage("Status:  Invalid Data");
             }
 
             tmp = outcome.Substring(2, 2);
             if(tmp == "00")
             {
-                AppendLog("Start:  A");
+                ShowMessage("Start:  A");
             }
             else if(tmp == "10")
             {
-                AppendLog("Start:  B");
+                ShowMessage("Start:  B");
             }
             else if(tmp == "20")
             {
-                AppendLog("Start:  C");
+                ShowMessage("Start:  C");
             }
             else if (tmp == "30")
             {
-                AppendLog("Start:  D");
+                ShowMessage("Start:  D");
             }
             else if (tmp == "F0")
             {
-                AppendLog("Start:  N/A");
+                ShowMessage("Start:  N/A");
             }
             else
             {
-                AppendLog("Start:  Invalid Data");
+                ShowMessage("Start:  Invalid Data");
             }
             //TODO:完善交易结果的outcome处理
 
@@ -1124,190 +1135,190 @@ namespace AuthHost
         {
             string tmp = "";
             tmp = outcome.Substring(0, 2);
-            AppendLog("TransOutcome: ");
+            ShowMessage("TransOutcome: ");
             //Status
             if (tmp == "10")
             {
-                AppendLog("Status:  Approved");
+                ShowMessage("Status:  Approved");
             }
             else if (tmp == "20")
             {
-                AppendLog("Status:  Declined");
+                ShowMessage("Status:  Declined");
             }
             else if (tmp == "30")
             {
-                AppendLog("Status:  Online Request");
+                ShowMessage("Status:  Online Request");
             }
             else if (tmp == "40")
             {
-                AppendLog("Status:  End Application");
+                ShowMessage("Status:  End Application");
             }
             else if (tmp == "50")
             {
-                AppendLog("Status:  Select Next");
+                ShowMessage("Status:  Select Next");
             }
             else if (tmp == "60")
             {
-                AppendLog("Status:  Try Another Interface");
+                ShowMessage("Status:  Try Another Interface");
             }
             else if (tmp == "70")
             {
-                AppendLog("Status:  Try Again");
+                ShowMessage("Status:  Try Again");
             }
             else if (tmp == "A0")
             {
-                AppendLog("Status:  End Application (with restart – communication error)");
+                ShowMessage("Status:  End Application (with restart – communication error)");
             }
             else if (tmp == "B0")
             {
-                AppendLog("Status:  End Application (with restart - On-Device CVM)");
+                ShowMessage("Status:  End Application (with restart - On-Device CVM)");
             }
             else if (tmp == "C0")
             {
-                AppendLog("Status:  Online Request (Two Presentments)");
+                ShowMessage("Status:  Online Request (Two Presentments)");
             }
             else if (tmp == "D0")
             {
-                AppendLog("Status:  Online Request (Present and Hold)");
+                ShowMessage("Status:  Online Request (Present and Hold)");
             }
             else if (tmp == "F0")
             {
-                AppendLog("Status:  Online Request (No Additional Tap)");
+                ShowMessage("Status:  Online Request (No Additional Tap)");
             }
             else if (tmp == "FF")
             {
-                AppendLog("Status:  N/A");
+                ShowMessage("Status:  N/A");
             }
             else
             {
-                AppendLog("Status:  Invalid Data");
+                ShowMessage("Status:  Invalid Data");
             }
             //Start
             tmp = outcome.Substring(2, 2);
             if (tmp == "00")
             {
-                AppendLog("Start:  A");
+                ShowMessage("Start:  A");
             }
             else if (tmp == "10")
             {
-                AppendLog("Start:  B");
+                ShowMessage("Start:  B");
             }
             else if (tmp == "20")
             {
-                AppendLog("Start:  C");
+                ShowMessage("Start:  C");
             }
             else if (tmp == "30")
             {
-                AppendLog("Start:  D");
+                ShowMessage("Start:  D");
             }
             else if (tmp == "F0")
             {
-                AppendLog("Start:  N/A");
+                ShowMessage("Start:  N/A");
             }
             else
             {
-                AppendLog("Start:  Invalid Data");
+                ShowMessage("Start:  Invalid Data");
             }
             //Online Response Data
             tmp = outcome.Substring(4, 2);
             if (tmp == "10")
             {
-                AppendLog("Online Response Data:  EMV Data");
+                ShowMessage("Online Response Data:  EMV Data");
             }
             else if (tmp == "20")
             {
-                AppendLog("Online Response Data:  Any");
+                ShowMessage("Online Response Data:  Any");
             }
             else if (tmp == "F0")
             {
-                AppendLog("Online Response Data:  N/A");
+                ShowMessage("Online Response Data:  N/A");
             }
             else
             {
-                AppendLog("Online Response Data:  Invalid Data");
+                ShowMessage("Online Response Data:  Invalid Data");
             }
             //CVM
             tmp = outcome.Substring(6, 2);
             if (tmp == "00")
             {
-                AppendLog("CVM:  No CVM");
+                ShowMessage("CVM:  No CVM");
             }
             else if (tmp == "10")
             {
-                AppendLog("CVM:  Obtain Signature");
+                ShowMessage("CVM:  Obtain Signature");
             }
             else if (tmp == "20")
             {
-                AppendLog("CVM:  Online PIN");
+                ShowMessage("CVM:  Online PIN");
             }
             else if (tmp == "30")
             {
-                AppendLog("CVM:  Confirmation Code Verified");
+                ShowMessage("CVM:  Confirmation Code Verified");
             }
             else if (tmp == "F0")
             {
-                AppendLog("CVM:  N/A");
+                ShowMessage("CVM:  N/A");
             }
             else
             {
-                AppendLog("CVM:  Invalid Data");
+                ShowMessage("CVM:  Invalid Data");
             }
             //Flag
             tmp = outcome.Substring(8, 2);
             byte flag = Convert.ToByte(tmp, 16);
             if ((flag & (0x80)) == 0x80)
             {
-                AppendLog("UI Request on Outcome Present:yes");
+                ShowMessage("UI Request on Outcome Present:yes");
             }
             else
             {
-                AppendLog("UI Request on Outcome Present:no");
+                ShowMessage("UI Request on Outcome Present:no");
             }
             if((flag & (0x40)) == 0x40)
             {
-                AppendLog("UI Request on Restart Present:yes");
+                ShowMessage("UI Request on Restart Present:yes");
             }
             else
             {
-                AppendLog("UI Request on Restart Present:no");
+                ShowMessage("UI Request on Restart Present:no");
             }
             if((flag& (0x20)) == 0x20)
             {
-                AppendLog("Data Record Present:yes");
+                ShowMessage("Data Record Present:yes");
             }
             else
             {
-                AppendLog("Data Record Present:no");
+                ShowMessage("Data Record Present:no");
             }
             if((flag&(0x10)) == 0x10)
             {
-                AppendLog("Discretionary Data Present:yes");
+                ShowMessage("Discretionary Data Present:yes");
             }
             else
             {
-                AppendLog("Discretionary Data Present:no");
+                ShowMessage("Discretionary Data Present:no");
             }
             if((flag&(0x08)) == 0x08)
             {
-                AppendLog("Receipt:yes");
+                ShowMessage("Receipt:yes");
             }
             else
             {
-                AppendLog("Receipt:N/A");
+                ShowMessage("Receipt:N/A");
             }
             //AIP
             tmp = outcome.Substring(10, 2);
             if(tmp == "10")
             {
-                AppendLog("AIP: Contant Chip");
+                ShowMessage("AIP: Contant Chip");
             }
             else if(tmp == "F0")
             {
-                AppendLog("AIP: N/A");
+                ShowMessage("AIP: N/A");
             }
             else
             {
-                AppendLog("AIP: Invalid Data");
+                ShowMessage("AIP: Invalid Data");
             }
             //Field Off Request
             tmp = outcome.Substring(12, 2);
@@ -1315,11 +1326,11 @@ namespace AuthHost
             {
                 if (tmp == "FF")
                 {
-                    AppendLog("Field Off Request: N/A");
+                    ShowMessage("Field Off Request: N/A");
                 }
                 else
                 {
-                    AppendLog("Field Off Request: " + tmp);
+                    ShowMessage("Field Off Request: " + tmp);
                 }
             }
             catch (ArgumentOutOfRangeException e)
@@ -1331,7 +1342,7 @@ namespace AuthHost
             tmp = outcome.Substring(14, 4);
             try
             {
-                AppendLog("Removal Timeout: " + tmp);
+                ShowMessage("Removal Timeout: " + tmp);
             }
             catch (ArgumentOutOfRangeException e)
             {
@@ -1343,17 +1354,17 @@ namespace AuthHost
         {
             TLVObject tLVObject = new TLVObject();
             
-            AppendLog("Data Record:");
+            ShowMessage("Data Record:");
             if (tLVObject.parse_tlvstring(msg))
             {
                 foreach (KeyValuePair<string, string> kvp in tLVObject.tlvDic)
                 {
-                    AppendLog(kvp.Key + ": " + kvp.Value);
+                    ShowMessage(kvp.Key + ": " + kvp.Value);
                 }
             }
             else
             {
-                AppendLog("Invalid Data");
+                ShowMessage("Invalid Data");
             }
         }
 
@@ -1361,11 +1372,11 @@ namespace AuthHost
         { 
             if(restart)
             {
-                AppendLog("UI Request On Restart:");
+                ShowMessage("UI Request On Restart:");
             }
             else
             {
-                AppendLog("UI Request On Outcome:");
+                ShowMessage("UI Request On Outcome:");
             }
             //Message Identifier
             string tmp = "";
@@ -1374,63 +1385,63 @@ namespace AuthHost
             {
                 if (tmp == "03")
                 {
-                    AppendLog("Message Identifier:  03(Approved)");
+                    ShowMessage("Message Identifier:  03(Approved)");
                 }
                 else if (tmp == "07")
                 {
-                    AppendLog("Message Identifier:  07(Not Authorised)");
+                    ShowMessage("Message Identifier:  07(Not Authorised)");
                 }
                 else if (tmp == "09")
                 {
-                    AppendLog("Message Identifier:  09(Please enter your PIN)");
+                    ShowMessage("Message Identifier:  09(Please enter your PIN)");
                 }
                 else if (tmp == "15")
                 {
-                    AppendLog("Message Identifier:  15(Present Card)");
+                    ShowMessage("Message Identifier:  15(Present Card)");
                 }
                 else if (tmp == "16")
                 {
-                    AppendLog("Message Identifier:  16(Processing)");
+                    ShowMessage("Message Identifier:  16(Processing)");
                 }
                 else if (tmp == "17")
                 {
-                    AppendLog("Message Identifier:  17(Card Read OK)");
+                    ShowMessage("Message Identifier:  17(Card Read OK)");
                 }
                 else if (tmp == "19")
                 {
-                    AppendLog("Message Identifier:  19(Please Present One Card Only)");
+                    ShowMessage("Message Identifier:  19(Please Present One Card Only)");
                 }
                 else if (tmp == "1A")
                 {
-                    AppendLog("Message Identifier:  1A(Approved – Please Sign)");
+                    ShowMessage("Message Identifier:  1A(Approved – Please Sign)");
                 }
                 else if (tmp == "1B")
                 {
-                    AppendLog("Message Identifier:  1B(Authorising, Please Wait)");
+                    ShowMessage("Message Identifier:  1B(Authorising, Please Wait)");
                 }
                 else if (tmp == "1C")
                 {
-                    AppendLog("Message Identifier:  1C(Insert, Swipe or Try another card)");
+                    ShowMessage("Message Identifier:  1C(Insert, Swipe or Try another card)");
                 }
                 else if (tmp == "1D")
                 {
-                    AppendLog("Message Identifier:  1D(Please insert card)");
+                    ShowMessage("Message Identifier:  1D(Please insert card)");
                 }
                 else if (tmp == "20")
                 {
-                    AppendLog("Message Identifier:  20(See Phone for Instructions)");
+                    ShowMessage("Message Identifier:  20(See Phone for Instructions)");
                 }
                 else if (tmp == "21")
                 {
-                    AppendLog("Message Identifier:  21(Present Card Again)");
+                    ShowMessage("Message Identifier:  21(Present Card Again)");
                 }
                 else if (tmp == "FF")
                 {
-                    AppendLog("Message Identifier:  N/A");
+                    ShowMessage("Message Identifier:  N/A");
                 }
                 else
                 {
-                    AppendLog("Message Identifier:  Invalid Data");
+                    ShowMessage("Message Identifier:  Invalid Data");
                 }
             }
             catch (ArgumentOutOfRangeException e)
@@ -1443,35 +1454,35 @@ namespace AuthHost
             {
                 if (tmp == "00")
                 {
-                    AppendLog("Status:  NOT READY");
+                    ShowMessage("Status:  NOT READY");
                 }
                 else if (tmp == "01")
                 {
-                    AppendLog("Status:  IDLE");
+                    ShowMessage("Status:  IDLE");
                 }
                 else if (tmp == "02")
                 {
-                    AppendLog("Status:  READY TO READ");
+                    ShowMessage("Status:  READY TO READ");
                 }
                 else if (tmp == "03")
                 {
-                    AppendLog("Status:  PROCESSING");
+                    ShowMessage("Status:  PROCESSING");
                 }
                 else if (tmp == "04")
                 {
-                    AppendLog("Status:  CARD READ SUCCESSFULLY");
+                    ShowMessage("Status:  CARD READ SUCCESSFULLY");
                 }
                 else if (tmp == "05")
                 {
-                    AppendLog("Status:  PROCESSING ERROR");
+                    ShowMessage("Status:  PROCESSING ERROR");
                 }
                 else if (tmp == "FF")
                 {
-                    AppendLog("Status:  N/A");
+                    ShowMessage("Status:  N/A");
                 }
                 else
                 {
-                    AppendLog("Status:  Invalid Data");
+                    ShowMessage("Status:  Invalid Data");
                 }
 
             }
@@ -1483,7 +1494,7 @@ namespace AuthHost
             tmp = msg.Substring(4, 2);
             try
             {
-                AppendLog("Hold Time:" + tmp);
+                ShowMessage("Hold Time:" + tmp);
             }
             catch (ArgumentOutOfRangeException e)
             {
@@ -1493,7 +1504,7 @@ namespace AuthHost
             tmp = msg.Substring(6, 4);
             try
             {
-                AppendLog("Language Preference:" + tmp);
+                ShowMessage("Language Preference:" + tmp);
             }
             catch (ArgumentOutOfRangeException e)
             {
@@ -1507,11 +1518,11 @@ namespace AuthHost
                 if (tmp == "20")
                 {
                     valueQualifier = "Balance";
-                    AppendLog("Value Qualifier: "+ valueQualifier);
+                    ShowMessage("Value Qualifier: "+ valueQualifier);
                 }
                 else
                 {
-                    AppendLog("Value Qualifier: N/A");
+                    ShowMessage("Value Qualifier: N/A");
                 }
             }
             catch (ArgumentOutOfRangeException e)
@@ -1524,11 +1535,11 @@ namespace AuthHost
             {
                 if(valueQualifier == "Balance")
                 {
-                    AppendLog("Value :" + tmp);
+                    ShowMessage("Value :" + tmp);
                 }
                 else
                 {
-                    AppendLog("Value : N/A");
+                    ShowMessage("Value : N/A");
                 }
             }
             catch (ArgumentOutOfRangeException e)
@@ -1542,11 +1553,11 @@ namespace AuthHost
             {
                 if (tmp == "0000")
                 {
-                    AppendLog("Currency Code : N/A");
+                    ShowMessage("Currency Code : N/A");
                 }
                 else
                 {
-                    AppendLog("Currency Code :" + tmp);
+                    ShowMessage("Currency Code :" + tmp);
                 }
             }
             catch (ArgumentOutOfRangeException e)
@@ -1592,7 +1603,7 @@ namespace AuthHost
 
         private void DealTransResult(byte[] tlvs)
         {
-            AppendLog("Trans Result:");
+            ShowMessage("Trans Result:");
             TLVObject tLVObject = new TLVObject();
             if(tLVObject.parse_tlvBCD(tlvs, tlvs.Length))
             {
@@ -1610,94 +1621,94 @@ namespace AuthHost
                     {
                         if(kvp.Value == "00")
                         {
-                            AppendLog("CVM:  No CVM");
+                            ShowMessage("CVM:  No CVM");
                         }
                         else if(kvp.Value == "10")
                         {
-                            AppendLog("CVM:  Signature");
+                            ShowMessage("CVM:  Signature");
                         }
                         else if(kvp.Value == "20")
                         {
-                            AppendLog("CVM:  Online PIN");
+                            ShowMessage("CVM:  Online PIN");
                         }
                         else if(kvp.Value == "30")
                         {
-                            AppendLog("CVM:  CDCVM");
+                            ShowMessage("CVM:  CDCVM");
                         }
                         else if(kvp.Key == "40")
                         {
-                            AppendLog("CVM:  N/A");
+                            ShowMessage("CVM:  N/A");
                         }
                         else
                         {
-                            AppendLog("CVM:   Invalid data");
+                            ShowMessage("CVM:   Invalid data");
                         }
                     }
                     else if(kvp.Key == "DF31")
                     {
-                        AppendLog("Script Result:" + kvp.Value);
+                        ShowMessage("Script Result:" + kvp.Value);
                     }
                     else if(kvp.Key == "DFC10B")
                     {
                         if(kvp.Value == "00")
                         {
-                            AppendLog("ODA Result:   ODA not Performed");
+                            ShowMessage("ODA Result:   ODA not Performed");
                         }
                         else if(kvp.Value == "01")
                         {
-                            AppendLog("ODA Result:   fDDA Succeed");
+                            ShowMessage("ODA Result:   fDDA Succeed");
                         }
                         else if(kvp.Value == "02")
                         {
-                            AppendLog("ODA Result:   fDDA Failed");
+                            ShowMessage("ODA Result:   fDDA Failed");
                         }
                         else if(kvp.Value == "03")
                         {
-                            AppendLog("ODA Result:   SDA Succeed");
+                            ShowMessage("ODA Result:   SDA Succeed");
                         }
                         else if(kvp.Value == "04")
                         {
-                            AppendLog("ODA Result:   SDA Failed");
+                            ShowMessage("ODA Result:   SDA Failed");
                         }
                         else if(kvp.Value == "05")
                         {
-                            AppendLog("ODA Result:   DDA Succeed");
+                            ShowMessage("ODA Result:   DDA Succeed");
                         }
                         else if(kvp.Value == "06")
                         {
-                            AppendLog("ODA Result:   DDA Failed");
+                            ShowMessage("ODA Result:   DDA Failed");
                         }
                         else if(kvp.Value == "07")
                         {
-                            AppendLog("ODA Result:   CDA Succeed");
+                            ShowMessage("ODA Result:   CDA Succeed");
                         }
                         else if(kvp.Value == "08")
                         {
-                            AppendLog("ODA Result:   CDA Failed");
+                            ShowMessage("ODA Result:   CDA Failed");
                         }
                         else if(kvp.Value == "09")
                         {
-                            AppendLog("ODA Result:   Online fDDA Succeed and Display");
+                            ShowMessage("ODA Result:   Online fDDA Succeed and Display");
                         }
                         else if(kvp.Value == "0A")
                         {
-                            AppendLog("ODA Result:   Online fDDA Failed and Display");
+                            ShowMessage("ODA Result:   Online fDDA Failed and Display");
                         }
                         else if(kvp.Value == "0B")
                         {
-                            AppendLog("ODA Result:   Online SDA Succeed and Display");
+                            ShowMessage("ODA Result:   Online SDA Succeed and Display");
                         }
                         else if(kvp.Value == "0C")
                         {
-                            AppendLog("ODA Result:   Online SDA Failed and Display");
+                            ShowMessage("ODA Result:   Online SDA Failed and Display");
                         }
                         else if(kvp.Value == "0D")
                         {
-                            AppendLog("ODA Result:   Online ODA Failed and Display");
+                            ShowMessage("ODA Result:   Online ODA Failed and Display");
                         }
                         else
                         {
-                            AppendLog("ODA Result:   Invalid Data");
+                            ShowMessage("ODA Result:   Invalid Data");
                         }
                     }
                     else if(kvp.Key == "DF8129")
@@ -1718,7 +1729,7 @@ namespace AuthHost
                     }
                     else
                     {
-                        AppendLog(kvp.Key + ": " + kvp.Value);
+                        ShowMessage(kvp.Key + ": " + kvp.Value);
                     }
                 }
             }
@@ -1731,31 +1742,31 @@ namespace AuthHost
 
         private void DealTermOutcome(byte[] tlvs)
         {
-            //AppendLog("Start DealTermOutcome");
+            AppendLog("Start DealTermOutcome");
             string s = Tool.HexByteArrayToString(tlvs);
-            //AppendLog("After HexByteArrayToString s:" + s);
+            AppendLog("After HexByteArrayToString s:" + s);
             TLVObject tLVObject = new TLVObject();
-            //AppendLog("Parse TLV result:" + tLVObject.parse_tlvstring(s));
+            AppendLog("Parse TLV result:" + tLVObject.parse_tlvstring(s));
             if (tLVObject.parse_tlvstring(s))
             {
                 if(tLVObject.Exist("DF8129"))
                 {
-                    AppendLog("________________________________________________");
+                    ShowMessage("________________________________________________");
                     ShowTransOutcome(tLVObject.Get("DF8129"));
                 }
                 if (tLVObject.Exist("DF8116"))
                 {
-                    AppendLog("________________________________________________");
+                    ShowMessage("________________________________________________");
                     ShowUIRequest(tLVObject.Get("DF8116"), false);
                 }
                 if (tLVObject.Exist("DF8117"))
                 {
-                    AppendLog("________________________________________________");
+                    ShowMessage("________________________________________________");
                     ShowUIRequest(tLVObject.Get("DF8117"), true);
                 }
                 if (tLVObject.Exist("FF8105"))
                 {
-                    AppendLog("________________________________________________");
+                    ShowMessage("________________________________________________");
                     ShowDataRecord(tLVObject.Get("FF8105"));
                 }
             }
@@ -1775,7 +1786,7 @@ namespace AuthHost
             {
                 if (ip.AddressFamily == AddressFamily.InterNetwork)  // IPv4地址
                 {
-                    Logger.Instance.Log(ip.ToString());
+                    Logger.Info(ip.ToString());
                     IPAddrList.Add(ip.ToString());
                 }
             }
@@ -1788,9 +1799,9 @@ namespace AuthHost
             string receivedData = Tool.ByteArrayToBcdString(data);
             bool needParseTLV = true;
 
-            //AppendLog("Recv Data: "+ receivedData);
-            //AppendLog("Recv Protocol: " + data[1].ToString("X2"));
-            //AppendLog("Recv MsgType:" + data[1]);
+            AppendLog("Recv Data: "+ receivedData);
+            AppendLog("Recv Protocol: " + data[1].ToString("X2"));
+            AppendLog("Recv MsgType:" + data[1]);
 
             if(data.Length == 4)
             {
@@ -1939,6 +1950,48 @@ namespace AuthHost
             {
                 e.Handled = true;
             }
+        }
+
+        private static void DisableLogging()
+        {
+            // 获取当前NLog配置
+            var config = LogManager.Configuration;
+
+            // 找到名为"logfile"的目标并禁用
+            var rule = config.LoggingRules.FirstOrDefault(r => r.Targets.Any(t => t.Name == "logfile"));
+            if (rule != null)
+            {
+                rule.DisableLoggingForLevel(LogLevel.Info);  // 禁用 Info 级别的日志
+                rule.DisableLoggingForLevel(LogLevel.Trace);  // 禁用 Trace 级别的日志
+                rule.DisableLoggingForLevel(LogLevel.Warn);  // 禁用 Warn 级别的日志
+                rule.DisableLoggingForLevel(LogLevel.Debug);  // 禁用 Debug 级别的日志
+                rule.DisableLoggingForLevel(LogLevel.Fatal);  // 禁用 Fatal 级别的日志
+                rule.DisableLoggingForLevel(LogLevel.Error);  // 禁用 Error 级别的日志
+            }
+
+            // 应用修改后的配置
+            LogManager.ReconfigExistingLoggers();
+        }
+
+        private static void EnableLogging()
+        {
+            // 获取当前NLog配置
+            var config = LogManager.Configuration;
+
+            // 找到名为"logfile"的目标并启用
+            var rule = config.LoggingRules.FirstOrDefault(r => r.Targets.Any(t => t.Name == "logfile"));
+            if (rule != null)
+            {
+                rule.EnableLoggingForLevel(LogLevel.Info);  //启用 Info 级别的日志
+                rule.EnableLoggingForLevel(LogLevel.Trace);  //启用 Trace 级别的日志
+                rule.EnableLoggingForLevel(LogLevel.Warn);  //启用 Warn 级别的日志
+                rule.EnableLoggingForLevel(LogLevel.Debug);  //启用 Debug 级别的日志
+                rule.EnableLoggingForLevel(LogLevel.Fatal);  //启用 Fatal 级别的日志
+                rule.EnableLoggingForLevel(LogLevel.Error);  //启用 Error 级别的日志
+            }
+
+            // 应用修改后的配置
+            LogManager.ReconfigExistingLoggers();
         }
     }
 }

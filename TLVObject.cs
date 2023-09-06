@@ -40,7 +40,7 @@ namespace AuthHost
             // First, we need to ensure the tlv string length is even
             if (tlv.Length % 2 != 0)
             {
-                Logger.Instance.Log("TLV string length is not even");
+                MainWnd.Logger.Info("TLV string length is not even");
                 return false;
             } 
 
@@ -60,7 +60,7 @@ namespace AuthHost
                             // Tag is 3 bytes
                             if (i + 6 > tlv.Length)
                             {
-                                Logger.Instance.Log("TLV string ends after tag");
+                                MainWnd.Logger.Info("TLV string ends after tag");
                                 return false; // Bounds check for 3 bytes tag
                             } 
                             tag = tlv.Substring(i, 6);
@@ -71,7 +71,7 @@ namespace AuthHost
                             // Tag is 2 bytes
                             if (i + 4 > tlv.Length)
                             {
-                                Logger.Instance.Log("TLV string ends after tag");
+                                MainWnd.Logger.Info("TLV string ends after tag");
                                 return false; // Bounds check for 2 bytes tag
                             } 
                             tag = tlv.Substring(i, 4);
@@ -87,7 +87,7 @@ namespace AuthHost
 
                     if (i >= tlv.Length)
                     {
-                        Logger.Instance.Log("TLV string ends after tag");
+                        MainWnd.Logger.Info("TLV string ends after tag");
                         return false; // Bounds check
                     } 
 
@@ -102,7 +102,7 @@ namespace AuthHost
                         {
                             if (i + j * 2 >= tlv.Length)
                             {
-                                Logger.Instance.Log("TLV string ends after length");
+                                MainWnd.Logger.Info("TLV string ends after length");
                                 return false; // Bounds check
                             } 
                             len = (len << 8) + Convert.ToByte(tlv.Substring(i + j * 2, 2), 16); // Construct the length from the subsequent bytes
@@ -118,7 +118,7 @@ namespace AuthHost
 
                     if (i + len * 2 > tlv.Length)
                     {
-                        Logger.Instance.Log("TLV string ends after value");
+                        MainWnd.Logger.Info("TLV string ends after value");
                         return false; // Bounds check
                     } 
 
@@ -135,7 +135,7 @@ namespace AuthHost
             catch
             {
                 // If there's any error in the process
-                Logger.Instance.Log("Error parsing TLV string");
+                MainWnd.Logger.Info("Error parsing TLV string");
                 return false;
             }
         }

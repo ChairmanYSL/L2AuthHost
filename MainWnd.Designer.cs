@@ -32,9 +32,9 @@ namespace AuthHost
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainWnd));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.logToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.logFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.openToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.closeToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_LogSwitch = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_ShowLogScreen = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_WriteLog = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox_Brand = new System.Windows.Forms.GroupBox();
             this.comboBox_Brand = new System.Windows.Forms.ComboBox();
             this.groupBox_Amount = new System.Windows.Forms.GroupBox();
@@ -127,33 +127,33 @@ namespace AuthHost
             // logToolStripMenuItem1
             // 
             this.logToolStripMenuItem1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.logFileToolStripMenuItem});
+            this.ToolStripMenuItem_LogSwitch});
             this.logToolStripMenuItem1.Name = "logToolStripMenuItem1";
             this.logToolStripMenuItem1.Size = new System.Drawing.Size(53, 21);
             this.logToolStripMenuItem1.Text = "File(F)";
             // 
-            // logFileToolStripMenuItem
+            // ToolStripMenuItem_LogSwitch
             // 
-            this.logFileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.openToolStripMenuItem1,
-            this.closeToolStripMenuItem1});
-            this.logFileToolStripMenuItem.Name = "logFileToolStripMenuItem";
-            this.logFileToolStripMenuItem.Size = new System.Drawing.Size(121, 22);
-            this.logFileToolStripMenuItem.Text = "Log File";
+            this.ToolStripMenuItem_LogSwitch.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.ToolStripMenuItem_ShowLogScreen,
+            this.ToolStripMenuItem_WriteLog});
+            this.ToolStripMenuItem_LogSwitch.Name = "ToolStripMenuItem_LogSwitch";
+            this.ToolStripMenuItem_LogSwitch.Size = new System.Drawing.Size(180, 22);
+            this.ToolStripMenuItem_LogSwitch.Text = "Log Switch";
             // 
-            // openToolStripMenuItem1
+            // ToolStripMenuItem_ShowLogScreen
             // 
-            this.openToolStripMenuItem1.Name = "openToolStripMenuItem1";
-            this.openToolStripMenuItem1.Size = new System.Drawing.Size(108, 22);
-            this.openToolStripMenuItem1.Text = "Open";
-            this.openToolStripMenuItem1.Click += new System.EventHandler(this.openToolStripMenuItem1_Click);
+            this.ToolStripMenuItem_ShowLogScreen.Name = "ToolStripMenuItem_ShowLogScreen";
+            this.ToolStripMenuItem_ShowLogScreen.Size = new System.Drawing.Size(180, 22);
+            this.ToolStripMenuItem_ShowLogScreen.Text = "Print Screen";
+            this.ToolStripMenuItem_ShowLogScreen.Click += new System.EventHandler(this.ToolStripMenuItem_ShowLogScreen_Click);
             // 
-            // closeToolStripMenuItem1
+            // ToolStripMenuItem_WriteLog
             // 
-            this.closeToolStripMenuItem1.Name = "closeToolStripMenuItem1";
-            this.closeToolStripMenuItem1.Size = new System.Drawing.Size(108, 22);
-            this.closeToolStripMenuItem1.Text = "Close";
-            this.closeToolStripMenuItem1.Click += new System.EventHandler(this.closeToolStripMenuItem1_Click);
+            this.ToolStripMenuItem_WriteLog.Name = "ToolStripMenuItem_WriteLog";
+            this.ToolStripMenuItem_WriteLog.Size = new System.Drawing.Size(180, 22);
+            this.ToolStripMenuItem_WriteLog.Text = "Write File";
+            this.ToolStripMenuItem_WriteLog.Click += new System.EventHandler(this.ToolStripMenuItem_WriteLog_Click);
             // 
             // groupBox_Brand
             // 
@@ -813,9 +813,9 @@ namespace AuthHost
         #endregion
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem logToolStripMenuItem1;
-        private System.Windows.Forms.ToolStripMenuItem logFileToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem openToolStripMenuItem1;
-        private System.Windows.Forms.ToolStripMenuItem closeToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_LogSwitch;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_ShowLogScreen;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_WriteLog;
         private System.Windows.Forms.GroupBox groupBox_Brand;
         private System.Windows.Forms.ComboBox comboBox_Brand;
         private System.Windows.Forms.GroupBox groupBox_Amount;

@@ -14,6 +14,8 @@ namespace AuthHost
     {
         public delegate void LogDelegate(string message);
         public event LogDelegate LogNeeded;
+        public delegate void MessageDelegate(string message);
+        public event MessageDelegate MessageNeeded;
         public delegate void SendDataDelegate(byte[] data);
         public event SendDataDelegate SendDataNeeded;
         public string AIDCfgName;
@@ -67,13 +69,13 @@ namespace AuthHost
 
         public void initBrand()
         {
-            Logger.Instance.Log("Config Dir: " + this.CfgDir);
+            MainWnd.Logger.Info("Config Dir: " + this.CfgDir);
             if (Directory.Exists(this.CfgDir))
             {
                 string[] files = Directory.GetDirectories(this.CfgDir);
                 foreach (string file in files)
                 {
-                    Logger.Instance.Log("Brand Name: " + Path.GetFileName(file));
+                    MainWnd.Logger.Info("Brand Name: " + Path.GetFileName(file));
                     this.BrandList.Add(Path.GetFileName(file));
                 }
             }
@@ -81,7 +83,7 @@ namespace AuthHost
 
         public void SetBrandLocaliton(string curBrand)
         {
-            Logger.Instance.Log("info: Input Brand Name: " + curBrand);
+            MainWnd.Logger.Info("info: Input Brand Name: " + curBrand);
             this.curBrandName = curBrand;
         }
 
@@ -92,11 +94,11 @@ namespace AuthHost
                 if (this.curBrandName == null)
                 {
                     AlertHelper.ShowAlert("Warning", "Cur Brand is null");
-                    Logger.Instance.Log("Error: Get Cur Brand From ComboBox Error");
+                    MainWnd.Logger.Info("Error: Get Cur Brand From ComboBox Error");
                     return;
                 }
 
-                Logger.Instance.Log("Cur Brand Name:" + this.curBrandName);
+                MainWnd.Logger.Info("Cur Brand Name:" + this.curBrandName);
                 string curBrandDir = this.CfgDir + "\\" + this.curBrandName;
 
                 this.AIDCfgName = curBrandDir + "\\AID";
@@ -106,12 +108,12 @@ namespace AuthHost
                 this.TermParCfgName = curBrandDir + "\\SimData";
                 this.RevokeyCfgName = curBrandDir + "\\Revocation_CAPK";
 
-                Logger.Instance.Log("AID Dir Name: " + this.AIDCfgName);
-                Logger.Instance.Log("CAPK Dir Name: " + this.CAPKCfgName);
-                Logger.Instance.Log("Exception_File Dir Name: " + this.ExcpFileCfgName);
-                Logger.Instance.Log("SimData Dir Name: " + this.TermParCfgName);
-                Logger.Instance.Log("Revocation_CAPK Dir Name: " + this.RevokeyCfgName);
-                Logger.Instance.Log("DRL Dir Name: " + this.DRLCfgName);
+                MainWnd.Logger.Info("AID Dir Name: " + this.AIDCfgName);
+                MainWnd.Logger.Info("CAPK Dir Name: " + this.CAPKCfgName);
+                MainWnd.Logger.Info("Exception_File Dir Name: " + this.ExcpFileCfgName);
+                MainWnd.Logger.Info("SimData Dir Name: " + this.TermParCfgName);
+                MainWnd.Logger.Info("Revocation_CAPK Dir Name: " + this.RevokeyCfgName);
+                MainWnd.Logger.Info("DRL Dir Name: " + this.DRLCfgName);
 
                 if (Directory.Exists(this.AIDCfgName))
                 {
@@ -128,7 +130,7 @@ namespace AuthHost
                 else
                 {
                     AlertHelper.ShowAlert("Warning", "Detect no AID File,Plz Check");
-                    Logger.Instance.Log("Warning: AID DIR path not exist");
+                    MainWnd.Logger.Info("Warning: AID DIR path not exist");
 
                 }
                 if (Directory.Exists(this.CAPKCfgName))
@@ -146,7 +148,7 @@ namespace AuthHost
                 else
                 {
                     AlertHelper.ShowAlert("Warning", "Detect no CAPK File,Plz Check");
-                    Logger.Instance.Log("Warning: CAPK DIR path not exist");
+                    MainWnd.Logger.Info("Warning: CAPK DIR path not exist");
                 }
                 if (Directory.Exists(this.DRLCfgName))
                 {
@@ -163,7 +165,7 @@ namespace AuthHost
                 else
                 {
                     AlertHelper.ShowAlert("Warning", "Detect no DRL File,Plz Check");
-                    Logger.Instance.Log("Warning: DRL DIR path not exist");
+                    MainWnd.Logger.Info("Warning: DRL DIR path not exist");
                 }
                 if (Directory.Exists(this.ExcpFileCfgName))
                 {
@@ -180,7 +182,7 @@ namespace AuthHost
                 else
                 {
                     AlertHelper.ShowAlert("Warning", "Detect no Excption File,Plz Check");
-                    Logger.Instance.Log("Warning: Excption File DIR path not exist");
+                    MainWnd.Logger.Info("Warning: Excption File DIR path not exist");
                 }
                 if (Directory.Exists(this.TermParCfgName))
                 {
@@ -197,7 +199,7 @@ namespace AuthHost
                 else
                 {
                     AlertHelper.ShowAlert("Warning", "Detect no Term Param File,Plz Check");
-                    Logger.Instance.Log("Warning: Term Param DIR path not exist");
+                    MainWnd.Logger.Info("Warning: Term Param DIR path not exist");
                 }
                 if (Directory.Exists(this.RevokeyCfgName))
                 {
@@ -214,13 +216,13 @@ namespace AuthHost
                 else
                 {
                     AlertHelper.ShowAlert("Warning", "Detect no Revokey File,Plz Check");
-                    Logger.Instance.Log("Warning: Revokey DIR path not exist");
+                    MainWnd.Logger.Info("Warning: Revokey DIR path not exist");
                 }
             }
             else
             {
                 AlertHelper.ShowAlert("Warning", "Detect no Config Dir,Plz Check");
-                Logger.Instance.Log("Warning: Config DIR path is null");
+                MainWnd.Logger.Info("Warning: Config DIR path is null");
             }
             docAID = new XmlDocument();
             docCAPK = new XmlDocument();
@@ -242,11 +244,10 @@ namespace AuthHost
                     {
                         files = Directory.GetFiles(directoryPath);
                         docAID.Load(files[index]);
-                        //Logger.Instance.Log("Load AID File:" + files[index]);
-                        //LogNeeded?.Invoke("Load AID File:" + files[index]);
+                        MainWnd.Logger.Info("Load AID File:" + files[index]);
                         XmlNode root = docAID.DocumentElement;
                         AIDNum = root.ChildNodes.Count;
-                        LogNeeded?.Invoke("AID Num:" + AIDNum);
+                        MessageNeeded?.Invoke("AID Num:" + AIDNum);
                         curAIDIndex = 0;
                     }
                     break;
@@ -256,11 +257,10 @@ namespace AuthHost
                     {
                         files = Directory.GetFiles(directoryPath);
                         docCAPK.Load(files[index]);
-                        //Logger.Instance.Log("Load CAPK File:" + files[index]);
-                        //LogNeeded?.Invoke("Load CAPK File:" + files[index]);
+                        MainWnd.Logger.Info("Load CAPK File:" + files[index]);
                         XmlNode root = docCAPK.DocumentElement;
                         CAPKNum = root.ChildNodes.Count;
-                        LogNeeded?.Invoke("CAPK Num:" + CAPKNum);
+                        MessageNeeded?.Invoke("CAPK Num:" + CAPKNum);
                         curCAPKIndex = 0;
                     }
                     break;
@@ -270,11 +270,10 @@ namespace AuthHost
                     {
                         files = Directory.GetFiles(directoryPath);
                         docDRL.Load(files[index]);
-                        Logger.Instance.Log("Load DRL File:" + files[index]);
-                        //LogNeeded?.Invoke("Load DRL File:" + files[index]);
+                        MainWnd.Logger.Info("Load DRL File:" + files[index]);
                         XmlNode root = docDRL.DocumentElement;
                         DRLNum = root.ChildNodes.Count;
-                        LogNeeded?.Invoke("DRL Num:" + DRLNum);
+                        MessageNeeded?.Invoke("DRL Num:" + DRLNum);
                         curDRLIndex = 0;
                     }
                     break;
@@ -284,11 +283,11 @@ namespace AuthHost
                     {
                         files = Directory.GetFiles(directoryPath);
                         docExcpfile.Load(files[index]);
-                        Logger.Instance.Log("Load Exception File:" + files[index]);
+                        MainWnd.Logger.Info("Load Exception File:" + files[index]);
                         //LogNeeded?.Invoke("Load Exception File:" + files[index]);
                         XmlNode root = docExcpfile.DocumentElement;
                         ExcpFileNum = root.ChildNodes.Count;
-                        LogNeeded?.Invoke("ExcpFile Num:" + ExcpFileNum);
+                        MessageNeeded?.Invoke("ExcpFile Num:" + ExcpFileNum);
                         curExcpFileIndex = 0;
                     }
                     break;
@@ -298,11 +297,10 @@ namespace AuthHost
                     {
                         files = Directory.GetFiles(directoryPath);
                         docTermparam.Load(files[index]);
-                        Logger.Instance.Log("Load Term Param File:" + files[index]);
-                        //LogNeeded?.Invoke("Load Term Param File:" + files[index]);
+                        MainWnd.Logger.Info("Load Term Param File:" + files[index]);
                         XmlNode root = docTermparam.DocumentElement;
                         TermParNum = root.ChildNodes.Count;
-                        LogNeeded?.Invoke("Term Param Num:" + TermParNum);
+                        MessageNeeded?.Invoke("Term Param Num:" + TermParNum);
                         curTermParIndex = 0;
                     }
                     break;
@@ -312,17 +310,18 @@ namespace AuthHost
                     {
                         files = Directory.GetFiles(directoryPath);
                         docRevokey.Load(files[index]);
-                        Logger.Instance.Log("Load Revokey File:" + files[index]);
+                        MainWnd.Logger.Info("Load Revokey File:" + files[index]);
                         //LogNeeded?.Invoke("Load Revokey File:" + files[index]);
                         XmlNode root = docRevokey.DocumentElement;
                         RevokeyNum = root.ChildNodes.Count;
-                        LogNeeded?.Invoke("Revokey Num:" + RevokeyNum);
+                        MessageNeeded?.Invoke("Revokey Num:" + RevokeyNum);
                         curRevokeyIndex = 0;
                     }
                     break;
                 default:
                     MainWnd mainWnd = new MainWnd();
-                    LogNeeded?.Invoke("Error: Input Cfg Type invalid");
+                    MainWnd.Logger.Info("Error: Input Cfg Type invalid");
+                    MessageNeeded?.Invoke("Error: Input Cfg Type invalid");
                     break;
             }
         }
@@ -342,10 +341,10 @@ namespace AuthHost
                 case CfgType.CfgAID:
                     root = docAID.DocumentElement;
                     XmlNode aidnode = root.FirstChild;
-                    //LogNeeded?.Invoke("Cur AID Index:" + curAIDIndex);
-                    if(curAIDIndex == AIDNum)
+                    MainWnd.Logger.Info("Cur AID Index:" + curAIDIndex);
+                    if (curAIDIndex == AIDNum)
                     {
-                        LogNeeded?.Invoke("Finish Download AID");
+                        MessageNeeded?.Invoke("Finish Download AID");
                         curAIDIndex = 0;
                         sendData = new byte[] { 0x02, 0x83, 0x00, 0x03, 0x03, 0x01, 0x00 };
                         break;
@@ -393,12 +392,12 @@ namespace AuthHost
                         }
                     }
                     len = s.Length;
-                    //LogNeeded?.Invoke("s.Length: " + len);
+                    MainWnd.Logger.Info("s.Length: " + len);
 
                     high = (byte)(((len / 2) >> 8) & 0xFF);
                     low = (byte)((len / 2) & 0xFF);
 
-                    //LogNeeded?.Invoke("s: " + s);
+                    MainWnd.Logger.Info("s: " + s);
                     bytes = Tool.StringToBCD(s);
 
                     sendData = new byte[len / 2 + 4];
@@ -408,8 +407,7 @@ namespace AuthHost
                     sendData[2] = high;
                     sendData[3] = low;
 
-                    Logger.Instance.Log("Send Data: " + Tool.ByteArrayToBcdString(sendData));
-                    //LogNeeded?.Invoke("Send Data: " + Tool.ByteArrayToBcdString(sendData));
+                    MainWnd.Logger.Info("Send Data: " + Tool.ByteArrayToBcdString(sendData));
                     curAIDIndex++;
                     break;
 
@@ -468,12 +466,12 @@ namespace AuthHost
                     }
       
                     len = s.Length;
-                    //LogNeeded?.Invoke("s.Length: " + len);
+                    MainWnd.Logger.Info("s.Length: " + len);
 
                     high = (byte)(((len/2) >> 8) & 0xFF);
                     low = (byte)((len/2) & 0xFF);
 
-                    //LogNeeded?.Invoke("s: " + s);
+                    MainWnd.Logger.Info("s: " + s);
                     bytes = Tool.StringToBCD(s);
 
                     sendData = new byte[len / 2 + 4];
@@ -483,15 +481,14 @@ namespace AuthHost
                     sendData[2] = high;
                     sendData[3] = low;
 
-                    Logger.Instance.Log("Send Data: " + Tool.ByteArrayToBcdString(sendData));
-                    //LogNeeded?.Invoke("Send Data: " + Tool.ByteArrayToBcdString(sendData));
+                    MainWnd.Logger.Info("Send Data: " + Tool.ByteArrayToBcdString(sendData));
                     curCAPKIndex++;
                     break;
 
                 case CfgType.CfgDRL:
                     root = docDRL.DocumentElement;
                     XmlNode drlnode = root.FirstChild;
-                    //LogNeeded?.Invoke("Cur DRL Index:" + curDRLIndex);
+                    MainWnd.Logger.Info("Cur DRL Index:" + curDRLIndex);
                     if(curDRLIndex == DRLNum)
                     {
                         LogNeeded?.Invoke("Finish Download DRL");
@@ -539,12 +536,12 @@ namespace AuthHost
                     }
 
                     len = s.Length;
-                    //LogNeeded?.Invoke("s.Length: " + len);
+                    MainWnd.Logger.Info("s.Length: " + len);
 
                     high = (byte)(((len / 2) >> 8) & 0xFF);
                     low = (byte)((len / 2) & 0xFF);
 
-                    //LogNeeded?.Invoke("s: " + s);
+                    MainWnd.Logger.Info("s: " + s);
                     bytes = Tool.StringToBCD(s);
 
                     sendData = new byte[len / 2 + 4];
@@ -554,15 +551,14 @@ namespace AuthHost
                     sendData[2] = high;
                     sendData[3] = low;
 
-                    Logger.Instance.Log("Send Data: " + Tool.ByteArrayToBcdString(sendData));
-                    //LogNeeded?.Invoke("Send Data: " + Tool.ByteArrayToBcdString(sendData));
+                    MainWnd.Logger.Info("Send Data: " + Tool.ByteArrayToBcdString(sendData));
                     curDRLIndex++;
                     break;
 
                 case CfgType.CfgExcpFile:
                     root = docExcpfile.DocumentElement;
                     XmlNode excpnode = root.FirstChild;
-                    //LogNeeded?.Invoke("Cur ExcpFile Index:" + curExcpFileIndex);
+                    MainWnd.Logger.Info("Cur ExcpFile Index:" + curExcpFileIndex);
                     if(curExcpFileIndex == ExcpFileNum)
                     {
                         LogNeeded?.Invoke("Finish Download Excption File");
@@ -608,12 +604,12 @@ namespace AuthHost
                         }
                     }
                     len = s.Length;
-                    //LogNeeded?.Invoke("s.Length: " + len);
+                    MainWnd.Logger.Info("s.Length: " + len);
 
                     high = (byte)(((len / 2) >> 8) & 0xFF);
                     low = (byte)((len / 2) & 0xFF);
 
-                    //LogNeeded?.Invoke("s: " + s);
+                    MainWnd.Logger.Info("s: " + s);
                     bytes = Tool.StringToBCD(s);
 
                     sendData = new byte[len / 2 + 4];
@@ -623,15 +619,14 @@ namespace AuthHost
                     sendData[2] = high;
                     sendData[3] = low;
 
-                    Logger.Instance.Log("Send Data: " + Tool.ByteArrayToBcdString(sendData));
-                    //LogNeeded?.Invoke("Send Data: " + Tool.ByteArrayToBcdString(sendData));
+                    MainWnd.Logger.Info("Send Data: " + Tool.ByteArrayToBcdString(sendData));
                     curExcpFileIndex++;
                     break;
 
                 case CfgType.CfgRevokey:
                     root = docRevokey.DocumentElement;
                     XmlNode revokeynode = root.FirstChild;
-                    //LogNeeded?.Invoke("Cur RevoKey Index:" + curRevokeyIndex);
+                    MainWnd.Logger.Info("Cur RevoKey Index:" + curRevokeyIndex);
                     if(curRevokeyIndex == RevokeyNum)
                     {
                         LogNeeded?.Invoke("Finish Download Revokey");
@@ -678,12 +673,12 @@ namespace AuthHost
                     }
 
                     len = s.Length;
-                    //LogNeeded?.Invoke("s.Length: " + len);
+                    MainWnd.Logger.Info("s.Length: " + len);
 
                     high = (byte)(((len / 2) >> 8) & 0xFF);
                     low = (byte)((len / 2) & 0xFF);
 
-                    //LogNeeded?.Invoke("s: " + s);
+                    MainWnd.Logger.Info("s: " + s);
                     bytes = Tool.StringToBCD(s);
 
                     sendData = new byte[len / 2 + 4];
@@ -693,15 +688,14 @@ namespace AuthHost
                     sendData[2] = high;
                     sendData[3] = low;
 
-                    Logger.Instance.Log("Send Data: " + Tool.ByteArrayToBcdString(sendData));
-                    //LogNeeded?.Invoke("Send Data: " + Tool.ByteArrayToBcdString(sendData));
+                    MainWnd.Logger.Info("Send Data: " + Tool.ByteArrayToBcdString(sendData));
                     curRevokeyIndex++;
                     break;
 
                 case CfgType.CfgTermParm:
                     root = docTermparam.DocumentElement;
                     XmlNode termparnode = root.FirstChild;
-                    //LogNeeded?.Invoke("Cur TermPar Index:" + curTermParIndex);
+                    MainWnd.Logger.Info("Cur TermPar Index:" + curTermParIndex);
                     if(curTermParIndex == TermParNum)
                     {
                         LogNeeded?.Invoke("Finish Download Term Param");
@@ -746,12 +740,12 @@ namespace AuthHost
                         }
                     }
 
-                    //LogNeeded?.Invoke("s.Length: " + len);
+                    MainWnd.Logger.Info("s.Length: " + len);
 
                     high = (byte)(((len / 2) >> 8) & 0xFF);
                     low = (byte)((len / 2) & 0xFF);
 
-                    //LogNeeded?.Invoke("s: " + s);
+                    MainWnd.Logger.Info("s: " + s);
                     bytes = Tool.StringToBCD(s);
 
                     sendData = new byte[len / 2 + 4];
@@ -761,8 +755,7 @@ namespace AuthHost
                     sendData[2] = high;
                     sendData[3] = low;
 
-                    Logger.Instance.Log("Send Data: " + Tool.ByteArrayToBcdString(sendData));
-                    //LogNeeded?.Invoke("Send Data: " + Tool.ByteArrayToBcdString(sendData));
+                    MainWnd.Logger.Info("Send Data: " + Tool.ByteArrayToBcdString(sendData));
                     curTermParIndex++;
                     break;
 
