@@ -869,6 +869,7 @@ namespace AuthHost
                 }
             }
 
+            AppendLog("Start DealFinanceRequest");
             string respCode = this.textBox_ISRespCode.Text;
             string authData = this.textBox_ISAuthData.Text;
             string script = this.textBox_ISScript.Text;
@@ -876,11 +877,20 @@ namespace AuthHost
             string sendData = "";
             int len;
 
-            if(respCode != null)
+            if (respCode != null)
             {
+                AppendLog("respCode in TextBox:" + respCode);
+                StringBuilder asciiBuilder = new StringBuilder();
+                foreach (char c in respCode)
+                {
+                    asciiBuilder.Append(((int)c).ToString("X2")); // 使用 "X2" 得到两位数的十六进制值
+                }
+                string result = asciiBuilder.ToString();
+
                 sendData += "8A02";
-                sendData += respCode;
-                ShowMessage("Current Response Code 8A:" + respCode);
+                sendData += result;
+                AppendLog("Current Response Code 8A: " + result);
+                ShowMessage("Current Response Code 8A:" + result);
             }
             if(authData != null)
             {
@@ -888,6 +898,7 @@ namespace AuthHost
                 len = authData.Length / 2;
                 sendData += len.ToString("X2");
                 sendData += authData;
+                AppendLog("Current Authorization Response Code 91:" + authData);
                 ShowMessage("Current Authorization Response Code 91:" + authData);
             }
             if(script != null)
@@ -896,6 +907,7 @@ namespace AuthHost
                 len = script.Length / 2;
                 sendData += len.ToString("X2");
                 sendData += script;
+                AppendLog("Current Script 71:" + script);
                 ShowMessage("Current Script 71:" + script);
             }
 
@@ -906,6 +918,7 @@ namespace AuthHost
                 sendData = "02" + "01" + high.ToString("X2") + low.ToString("X2") + sendData;
                 if(this.CommunicationType == (byte)CommType.TCP)
                 {
+                    AppendLog("Send FinanceRequest Pack:" + sendData);
                     this.tcpServer.Broadcast(Tool.StringToHexByteArray(sendData));
                 }
                 else if(this.CommunicationType == (byte)CommType.SERIAL)
@@ -1355,6 +1368,8 @@ namespace AuthHost
             TLVObject tLVObject = new TLVObject();
             
             ShowMessage("Data Record:");
+            AppendLog("Start ShowDataRecord");
+            AppendLog("Input Data:" + msg);
             if (tLVObject.parse_tlvstring(msg))
             {
                 foreach (KeyValuePair<string, string> kvp in tLVObject.tlvDic)
@@ -1406,6 +1421,10 @@ namespace AuthHost
                 else if (tmp == "17")
                 {
                     ShowMessage("Message Identifier:  17(Card Read OK)");
+                }
+                else if(tmp == "18")
+                {
+                    ShowMessage("Message Identifier:  18(Please insert or swipe card)");
                 }
                 else if (tmp == "19")
                 {
@@ -1548,23 +1567,25 @@ namespace AuthHost
                 AppendLog($"ArgumentOutOfRangeException: {e.Message}\nStackTrace: {e.StackTrace}");
             }
             //Currency Code
-            tmp = msg.Substring(24, 4);
-            try
-            {
-                if (tmp == "0000")
-                {
-                    ShowMessage("Currency Code : N/A");
-                }
-                else
-                {
-                    ShowMessage("Currency Code :" + tmp);
-                }
-            }
-            catch (ArgumentOutOfRangeException e)
-            {
-                AppendLog("Show Currency Code fail!length invalid!");
-                AppendLog($"ArgumentOutOfRangeException: {e.Message}\nStackTrace: {e.StackTrace}");
-            }
+            ShowMessage("Currency Code : N/A"); //for FIME Test Special request
+
+            //tmp = msg.Substring(24, 4);
+            //try
+            //{
+            //    if (tmp == "0000")
+            //    {
+            //        ShowMessage("Currency Code : N/A");
+            //    }
+            //    else
+            //    {
+            //        ShowMessage("Currency Code :" + tmp);
+            //    }
+            //}
+            //catch (ArgumentOutOfRangeException e)
+            //{
+            //    AppendLog("Show Currency Code fail!length invalid!");
+            //    AppendLog($"ArgumentOutOfRangeException: {e.Message}\nStackTrace: {e.StackTrace}");
+            //}
 
         }
 

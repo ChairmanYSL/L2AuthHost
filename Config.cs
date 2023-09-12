@@ -740,6 +740,7 @@ namespace AuthHost
                         }
                     }
 
+                    len = s.Length;
                     MainWnd.Logger.Info("s.Length: " + len);
 
                     high = (byte)(((len / 2) >> 8) & 0xFF);
@@ -755,7 +756,7 @@ namespace AuthHost
                     sendData[2] = high;
                     sendData[3] = low;
 
-                    MainWnd.Logger.Info("Send Data: " + Tool.ByteArrayToBcdString(sendData));
+                    MainWnd.Logger.Info("Send Term Param Data: " + Tool.ByteArrayToBcdString(sendData));
                     curTermParIndex++;
                     break;
 
