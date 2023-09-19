@@ -6,15 +6,14 @@
     <Cfg label="9F09" Name="Application Version" Format="b 2">0001</Cfg>
     <Cfg label="9F1B" Name="Terminal Floor Limit" Format="n 12">000000006000</Cfg>
     <Cfg label="DF11" Name="Terminal Action Code Default" Format="b 5">0000000000</Cfg>
-    <Cfg label="DF12" Name="Terminal Action Code Online" Format="b 5">0000008000</Cfg>
-    <Cfg label="DF13" Name="Terminal Action Code Denial" Format="b 5">0000000000</Cfg>
+    <Cfg label="DF12" Name="Terminal Action Code Online" Format="b 5">0000000000</Cfg>
     <Cfg label="DF14" Name="Default DDOL" Format="b 3">9F3704</Cfg>
     <Cfg label="DF19" Name="Contactless Floor Limit" Format="n 12">000000005000</Cfg>
     <Cfg label="DF1A" Name="Zero amount allowed flag" Format="b 1">01</Cfg>
     <Cfg label="DF20" Name="Contactless Transaction Limit" Format="n 12">000000010000</Cfg>
     <Cfg label="DF21" Name="CVM Required Limit" Format="n 12">000000002500</Cfg>
     <Cfg label="DF32" Name="Status check supported flag" Format="b 1">01</Cfg>
-    <Cfg label="DF37" Name="Contactless application Capabilities" Format="b 5">36004002F9</Cfg>
+    <Cfg label="DF37" Name="Contactless application Capabilities" Format="b 5">2000000398</Cfg>
     <Cfg label="DF38" Name="Transaction type value for AAT" Format="b 1">90</Cfg>
     <Cfg label="DF39" Name="Additional Tag Object List (ATOL)" Format="b 256">9F029F039F26829F369F279F109F1A955F2A9A9C9F379F35579F34845F345AC79F339F739F779F45</Cfg>
     <Cfg label="DF40" Name="Contactless POS implementation options" Format="b 1">26</Cfg>
@@ -29,7 +28,7 @@
     <Cfg label="9F09" Name="Application Version" Format="b 2">0001</Cfg>
     <Cfg label="9F1B" Name="Terminal Floor Limit" Format="n 12">000000011000</Cfg>
     <Cfg label="DF11" Name="Terminal Action Code Default" Format="b 5">0000000000</Cfg>
-    <Cfg label="DF12" Name="Terminal Action Code Online" Format="b 5">0000008000</Cfg>
+    <Cfg label="DF12" Name="Terminal Action Code Online" Format="b 5">0000000000</Cfg>
     <Cfg label="DF13" Name="Terminal Action Code Denial" Format="b 5">0000000000</Cfg>
     <Cfg label="DF14" Name="Default DDOL" Format="b 3">9F3704</Cfg>
     <Cfg label="DF19" Name="Contactless Floor Limit" Format="n 12">000000010000</Cfg>
@@ -37,7 +36,7 @@
     <Cfg label="DF20" Name="Contactless Transaction Limit" Format="n 12">000000015000</Cfg>
     <Cfg label="DF21" Name="CVM Required Limit" Format="n 12">000000005000</Cfg>
     <Cfg label="DF32" Name="Status check supported flag" Format="b 1">00</Cfg>
-    <Cfg label="DF37" Name="Contactless application Capabilities" Format="b 5">36004002F9</Cfg>
+    <Cfg label="DF37" Name="Contactless application Capabilities" Format="b 5">2000000398</Cfg>
     <Cfg label="DF38" Name="Transaction type value for AAT" Format="b 1">90</Cfg>
     <Cfg label="DF39" Name="Additional Tag Object List (ATOL)" Format="b 256">9F029F039F26829F369F279F109F1A955F2A9A9C9F379F35579F34845F345AC79F339F739F779F45</Cfg>
     <Cfg label="DF40" Name="Contactless POS implementation options" Format="b 1">26</Cfg>
@@ -52,15 +51,14 @@
     <Cfg label="9F09" Name="Application Version" Format="b 2">0001</Cfg>
     <Cfg label="9F1B" Name="Terminal Floor Limit" Format="n 12">000000017000</Cfg>
     <Cfg label="DF11" Name="Terminal Action Code Default" Format="b 5">0000000000</Cfg>
-    <Cfg label="DF12" Name="Terminal Action Code Online" Format="b 5">0000008000</Cfg>
-    <Cfg label="DF13" Name="Terminal Action Code Denial" Format="b 5">0000000000</Cfg>
+    <Cfg label="DF12" Name="Terminal Action Code Online" Format="b 5">0000000000</Cfg>
     <Cfg label="DF14" Name="Default DDOL" Format="b 3">9F3704</Cfg>
     <Cfg label="DF19" Name="Contactless Floor Limit" Format="n 12">000000015000</Cfg>
     <Cfg label="DF1A" Name="Zero amount allowed flag" Format="b 1">01</Cfg>
     <Cfg label="DF20" Name="Contactless Transaction Limit" Format="n 12">000000020000</Cfg>
     <Cfg label="DF21" Name="CVM Required Limit" Format="n 12">000000007500</Cfg>
     <Cfg label="DF32" Name="Support Status Check" Format="b 1">01</Cfg>
-    <Cfg label="DF37" Name="Contactless application Capabilities" Format="b 5">36004002F9</Cfg>
+    <Cfg label="DF37" Name="Contactless application Capabilities" Format="b 5">2000000398</Cfg>
     <Cfg label="DF38" Name="Transaction type value for AAT" Format="b 1">90</Cfg>
     <Cfg label="DF39" Name="Additional Tag Object List (ATOL)" Format="b 256">9F029F039F26829F369F279F109F1A955F2A9A9C9F379F35579F34845F345AC79F339F739F779F45</Cfg>
     <Cfg label="DF40" Name="Contactless POS implementation options" Format="b 1">26</Cfg>
@@ -76,15 +74,14 @@
     <Cfg label="9F09" Name="Application Version" Format="b 2">0001</Cfg>
     <Cfg label="9F1B" Name="Terminal Floor Limit" Format="n 12">000000022000</Cfg>
     <Cfg label="DF11" Name="Terminal Action Code Default" Format="b 5">0000000000</Cfg>
-    <Cfg label="DF12" Name="Terminal Action Code Online" Format="b 5">0000008000</Cfg>
-    <Cfg label="DF13" Name="Terminal Action Code Denial" Format="b 5">0000000000</Cfg>
+    <Cfg label="DF12" Name="Terminal Action Code Online" Format="b 5">0000000000</Cfg>
     <Cfg label="DF14" Name="Default DDOL" Format="b 3">9F3704</Cfg>
     <Cfg label="DF19" Name="Contactless Floor Limit" Format="n 12">000000020000</Cfg>
     <Cfg label="DF1A" Name="Zero amount allowed flag" Format="b 1">00</Cfg>
     <Cfg label="DF20" Name="Contactless Transaction Limit" Format="n 12">000000025000</Cfg>
     <Cfg label="DF21" Name="CVM Required Limit" Format="n 12">000000010000</Cfg>
     <Cfg label="DF32" Name="Status check supported flag" Format="b 1">00</Cfg>
-    <Cfg label="DF37" Name="Contactless application Capabilities" Format="b 5">36004002F9</Cfg>
+    <Cfg label="DF37" Name="Contactless application Capabilities" Format="b 5">2000000398</Cfg>
     <Cfg label="DF38" Name="Transaction type value for AAT" Format="b 1">90</Cfg>
     <Cfg label="DF39" Name="Additional Tag Object List (ATOL)" Format="b 256">9F029F039F26829F369F279F109F1A955F2A9A9C9F379F35579F34845F345AC79F339F739F779F45</Cfg>
     <Cfg label="DF40" Name="Contactless POS implementation options" Format="b 1">26</Cfg>
@@ -101,14 +98,13 @@
     <Cfg label="9F1B" Name="Terminal Floor Limit" Format="n 12">000000060000</Cfg>
     <Cfg label="DF11" Name="Terminal Action Code Default" Format="b 5">0000000000</Cfg>
     <Cfg label="DF12" Name="Terminal Action Code Online" Format="b 5">0000000000</Cfg>
-    <Cfg label="DF13" Name="Terminal Action Code Denial" Format="b 5">0000000000</Cfg>
     <Cfg label="DF14" Name="Default DDOL" Format="b 3">9F3704</Cfg>
     <Cfg label="DF19" Name="Contactless Floor Limit" Format="n 12">000000050000</Cfg>
     <Cfg label="DF1A" Name="Zero amount allowed flag" Format="b 1">00</Cfg>
     <Cfg label="DF20" Name="Contactless Transaction Limit" Format="n 12">000000100000</Cfg>
     <Cfg label="DF21" Name="CVM Required Limit" Format="n 12">000000025000</Cfg>
     <Cfg label="DF32" Name="Status check supported flag" Format="b 1">00</Cfg>
-    <Cfg label="DF37" Name="Contactless application Capabilities" Format="b 5">36004002F9</Cfg>
+    <Cfg label="DF37" Name="Contactless application Capabilities" Format="b 5">2000000398</Cfg>
     <Cfg label="DF38" Name="Transaction type value for AAT" Format="b 1">90</Cfg>
     <Cfg label="DF39" Name="Additional Tag Object List (ATOL)" Format="b 256">9F029F039F26829F369F279F109F1A955F2A9A9C9F379F35579F34845F345AC79F339F739F779F45</Cfg>
     <Cfg label="DF40" Name="Contactless POS implementation options" Format="b 1">26</Cfg>
@@ -124,12 +120,11 @@
     <Cfg label="9F09" Name="Application Version" Format="b 2">0001</Cfg>
     <Cfg label="DF11" Name="Terminal Action Code Default" Format="b 5">0000000000</Cfg>
     <Cfg label="DF12" Name="Terminal Action Code Online" Format="b 5">0000000000</Cfg>
-    <Cfg label="DF13" Name="Terminal Action Code Denial" Format="b 5">0000000000</Cfg>
     <Cfg label="DF14" Name="Default DDOL" Format="b 3">9F3704</Cfg>
     <Cfg label="DF1A" Name="Zero amount allowed flag" Format="b 1">00</Cfg>
     <Cfg label="DF20" Name="Contactless Transaction Limit" Format="n 12">000000150000</Cfg>
     <Cfg label="DF32" Name="Status check supported flag" Format="b 1">00</Cfg>
-    <Cfg label="DF37" Name="Contactless application Capabilities" Format="b 5">36004002F9</Cfg>
+    <Cfg label="DF37" Name="Contactless application Capabilities" Format="b 5">2000000398</Cfg>
     <Cfg label="DF38" Name="Transaction type value for AAT" Format="b 1">90</Cfg>
     <Cfg label="DF39" Name="Additional Tag Object List (ATOL)" Format="b 256">9F029F039F26829F369F279F109F1A955F2A9A9C9F379F35579F34845F345AC79F339F739F779F45</Cfg>
     <Cfg label="DF40" Name="Contactless POS implementation options" Format="b 1">26</Cfg>
@@ -145,12 +140,11 @@
     <Cfg label="9F09" Name="Application Version" Format="b 2">0001</Cfg>
     <Cfg label="DF11" Name="Terminal Action Code Default" Format="b 5">0000000000</Cfg>
     <Cfg label="DF12" Name="Terminal Action Code Online" Format="b 5">0000000000</Cfg>
-    <Cfg label="DF13" Name="Terminal Action Code Denial" Format="b 5">0000000000</Cfg>
     <Cfg label="DF14" Name="Default DDOL" Format="b 3">9F3704</Cfg>
     <Cfg label="DF1A" Name="Zero amount allowed flag" Format="b 1">00</Cfg>
     <Cfg label="DF20" Name="Contactless Transaction Limit" Format="n 12">000000200000</Cfg>
     <Cfg label="DF32" Name="Status check supported flag" Format="b 1">00</Cfg>
-    <Cfg label="DF37" Name="Contactless application Capabilities" Format="b 5">36004002F9</Cfg>
+    <Cfg label="DF37" Name="Contactless application Capabilities" Format="b 5">2000000398</Cfg>
     <Cfg label="DF38" Name="Transaction type value for AAT" Format="b 1">90</Cfg>
     <Cfg label="DF39" Name="Additional Tag Object List (ATOL)" Format="b 256">9F029F039F26829F369F279F109F1A955F2A9A9C9F379F35579F34845F345AC79F339F739F779F45</Cfg>
     <Cfg label="DF40" Name="Contactless POS implementation options" Format="b 1">26</Cfg>
@@ -166,12 +160,11 @@
     <Cfg label="9F09" Name="Application Version" Format="b 2">0001</Cfg>
     <Cfg label="DF11" Name="Terminal Action Code Default" Format="b 5">0000000000</Cfg>
     <Cfg label="DF12" Name="Terminal Action Code Online" Format="b 5">0000000000</Cfg>
-    <Cfg label="DF13" Name="Terminal Action Code Denial" Format="b 5">0000000000</Cfg>
     <Cfg label="DF14" Name="Default DDOL" Format="b 3">9F3704</Cfg>
     <Cfg label="DF1A" Name="Zero amount allowed flag" Format="b 1">00</Cfg>
     <Cfg label="DF20" Name="Contactless Transaction Limit" Format="n 12">000000250000</Cfg>
     <Cfg label="DF32" Name="Status check supported flag" Format="b 1">00</Cfg>
-    <Cfg label="DF37" Name="Contactless application Capabilities" Format="b 5">36004002F9</Cfg>
+    <Cfg label="DF37" Name="Contactless application Capabilities" Format="b 5">2000000398</Cfg>
     <Cfg label="DF38" Name="Transaction type value for AAT" Format="b 1">90</Cfg>
     <Cfg label="DF39" Name="Additional Tag Object List (ATOL)" Format="b 256">9F029F039F26829F369F279F109F1A955F2A9A9C9F379F35579F34845F345AC79F339F739F779F45</Cfg>
     <Cfg label="DF40" Name="Contactless POS implementation options" Format="b 1">26</Cfg>
@@ -188,13 +181,12 @@
     <Cfg label="9F1B" Name="Terminal Floor Limit" Format="n 12">000000006000</Cfg>
     <Cfg label="DF11" Name="Terminal Action Code Default" Format="b 5">0000000000</Cfg>
     <Cfg label="DF12" Name="Terminal Action Code Online" Format="b 5">0000000000</Cfg>
-    <Cfg label="DF13" Name="Terminal Action Code Denial" Format="b 5">0000000000</Cfg>
     <Cfg label="DF14" Name="Default DDOL" Format="b 3">9F3704</Cfg>
     <Cfg label="DF19" Name="Contactless Floor Limit" Format="n 12">000000005000</Cfg>
     <Cfg label="DF1A" Name="Zero amount allowed flag" Format="b 1">00</Cfg>
     <Cfg label="DF21" Name="CVM Required Limit" Format="n 12">000000002500</Cfg>
     <Cfg label="DF32" Name="Status check supported flag" Format="b 1">00</Cfg>
-    <Cfg label="DF37" Name="Contactless application Capabilities" Format="b 5">36004002F9</Cfg>
+    <Cfg label="DF37" Name="Contactless application Capabilities" Format="b 5">2000000398</Cfg>
     <Cfg label="DF38" Name="Transaction type value for AAT" Format="b 1">90</Cfg>
     <Cfg label="DF39" Name="Additional Tag Object List (ATOL)" Format="b 256">9F02009F03009F26008200009F36009F27009F10009F1A00955F2A9A9C9F379F35579F34845F345AC79F339F739F779F45</Cfg>
     <Cfg label="DF40" Name="Contactless POS implementation options" Format="b 1">26</Cfg>

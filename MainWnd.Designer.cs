@@ -116,10 +116,12 @@ namespace AuthHost
             // 
             // menuStrip1
             // 
+            this.menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.logToolStripMenuItem1});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
+            this.menuStrip1.Padding = new System.Windows.Forms.Padding(4, 2, 0, 2);
             this.menuStrip1.Size = new System.Drawing.Size(1301, 25);
             this.menuStrip1.TabIndex = 1;
             this.menuStrip1.Text = "menuStrip1";
@@ -138,20 +140,20 @@ namespace AuthHost
             this.ToolStripMenuItem_ShowLogScreen,
             this.ToolStripMenuItem_WriteLog});
             this.ToolStripMenuItem_LogSwitch.Name = "ToolStripMenuItem_LogSwitch";
-            this.ToolStripMenuItem_LogSwitch.Size = new System.Drawing.Size(180, 22);
+            this.ToolStripMenuItem_LogSwitch.Size = new System.Drawing.Size(138, 22);
             this.ToolStripMenuItem_LogSwitch.Text = "Log Switch";
             // 
             // ToolStripMenuItem_ShowLogScreen
             // 
             this.ToolStripMenuItem_ShowLogScreen.Name = "ToolStripMenuItem_ShowLogScreen";
-            this.ToolStripMenuItem_ShowLogScreen.Size = new System.Drawing.Size(180, 22);
+            this.ToolStripMenuItem_ShowLogScreen.Size = new System.Drawing.Size(145, 22);
             this.ToolStripMenuItem_ShowLogScreen.Text = "Print Screen";
             this.ToolStripMenuItem_ShowLogScreen.Click += new System.EventHandler(this.ToolStripMenuItem_ShowLogScreen_Click);
             // 
             // ToolStripMenuItem_WriteLog
             // 
             this.ToolStripMenuItem_WriteLog.Name = "ToolStripMenuItem_WriteLog";
-            this.ToolStripMenuItem_WriteLog.Size = new System.Drawing.Size(180, 22);
+            this.ToolStripMenuItem_WriteLog.Size = new System.Drawing.Size(145, 22);
             this.ToolStripMenuItem_WriteLog.Text = "Write File";
             this.ToolStripMenuItem_WriteLog.Click += new System.EventHandler(this.ToolStripMenuItem_WriteLog_Click);
             // 
@@ -450,7 +452,7 @@ namespace AuthHost
             this.comboBox_PreProCfg.FormattingEnabled = true;
             this.comboBox_PreProCfg.Location = new System.Drawing.Point(97, 303);
             this.comboBox_PreProCfg.Name = "comboBox_PreProCfg";
-            this.comboBox_PreProCfg.Size = new System.Drawing.Size(121, 20);
+            this.comboBox_PreProCfg.Size = new System.Drawing.Size(137, 20);
             this.comboBox_PreProCfg.TabIndex = 13;
             // 
             // comboBox_RevoKeyCfg
@@ -458,7 +460,7 @@ namespace AuthHost
             this.comboBox_RevoKeyCfg.FormattingEnabled = true;
             this.comboBox_RevoKeyCfg.Location = new System.Drawing.Point(97, 255);
             this.comboBox_RevoKeyCfg.Name = "comboBox_RevoKeyCfg";
-            this.comboBox_RevoKeyCfg.Size = new System.Drawing.Size(121, 20);
+            this.comboBox_RevoKeyCfg.Size = new System.Drawing.Size(137, 20);
             this.comboBox_RevoKeyCfg.TabIndex = 12;
             // 
             // comboBox_TermParmCfg
@@ -466,7 +468,7 @@ namespace AuthHost
             this.comboBox_TermParmCfg.FormattingEnabled = true;
             this.comboBox_TermParmCfg.Location = new System.Drawing.Point(97, 207);
             this.comboBox_TermParmCfg.Name = "comboBox_TermParmCfg";
-            this.comboBox_TermParmCfg.Size = new System.Drawing.Size(121, 20);
+            this.comboBox_TermParmCfg.Size = new System.Drawing.Size(137, 20);
             this.comboBox_TermParmCfg.TabIndex = 11;
             // 
             // comboBox_DRLCfg
@@ -474,7 +476,7 @@ namespace AuthHost
             this.comboBox_DRLCfg.FormattingEnabled = true;
             this.comboBox_DRLCfg.Location = new System.Drawing.Point(97, 157);
             this.comboBox_DRLCfg.Name = "comboBox_DRLCfg";
-            this.comboBox_DRLCfg.Size = new System.Drawing.Size(121, 20);
+            this.comboBox_DRLCfg.Size = new System.Drawing.Size(137, 20);
             this.comboBox_DRLCfg.TabIndex = 10;
             // 
             // comboBox_ExcpFileCfg
@@ -482,7 +484,7 @@ namespace AuthHost
             this.comboBox_ExcpFileCfg.FormattingEnabled = true;
             this.comboBox_ExcpFileCfg.Location = new System.Drawing.Point(98, 108);
             this.comboBox_ExcpFileCfg.Name = "comboBox_ExcpFileCfg";
-            this.comboBox_ExcpFileCfg.Size = new System.Drawing.Size(121, 20);
+            this.comboBox_ExcpFileCfg.Size = new System.Drawing.Size(136, 20);
             this.comboBox_ExcpFileCfg.TabIndex = 9;
             // 
             // comboBox_CAPKCfg
@@ -490,7 +492,7 @@ namespace AuthHost
             this.comboBox_CAPKCfg.FormattingEnabled = true;
             this.comboBox_CAPKCfg.Location = new System.Drawing.Point(97, 67);
             this.comboBox_CAPKCfg.Name = "comboBox_CAPKCfg";
-            this.comboBox_CAPKCfg.Size = new System.Drawing.Size(121, 20);
+            this.comboBox_CAPKCfg.Size = new System.Drawing.Size(137, 20);
             this.comboBox_CAPKCfg.TabIndex = 8;
             // 
             // comboBox_AIDCfg
@@ -498,7 +500,7 @@ namespace AuthHost
             this.comboBox_AIDCfg.FormattingEnabled = true;
             this.comboBox_AIDCfg.Location = new System.Drawing.Point(97, 19);
             this.comboBox_AIDCfg.Name = "comboBox_AIDCfg";
-            this.comboBox_AIDCfg.Size = new System.Drawing.Size(121, 20);
+            this.comboBox_AIDCfg.Size = new System.Drawing.Size(137, 20);
             this.comboBox_AIDCfg.TabIndex = 7;
             // 
             // label_PreProcess
@@ -584,7 +586,7 @@ namespace AuthHost
             this.tabPage_SerialSetting.Controls.Add(this.label1);
             this.tabPage_SerialSetting.Location = new System.Drawing.Point(4, 22);
             this.tabPage_SerialSetting.Name = "tabPage_SerialSetting";
-            this.tabPage_SerialSetting.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage_SerialSetting.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
             this.tabPage_SerialSetting.Size = new System.Drawing.Size(276, 130);
             this.tabPage_SerialSetting.TabIndex = 0;
             this.tabPage_SerialSetting.Text = "Serial Port";
@@ -655,7 +657,7 @@ namespace AuthHost
             this.tabPage_TCPSetting.Controls.Add(this.label_IPAddr);
             this.tabPage_TCPSetting.Location = new System.Drawing.Point(4, 22);
             this.tabPage_TCPSetting.Name = "tabPage_TCPSetting";
-            this.tabPage_TCPSetting.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage_TCPSetting.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
             this.tabPage_TCPSetting.Size = new System.Drawing.Size(276, 130);
             this.tabPage_TCPSetting.TabIndex = 1;
             this.tabPage_TCPSetting.Text = "TCP";

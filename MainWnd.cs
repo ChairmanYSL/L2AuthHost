@@ -589,7 +589,10 @@ namespace AuthHost
                 return;
             }
             IPAddress iPAddress = IPAddress.Parse(ipAddressString);
-            this.tcpServer.Start(iPAddress, port);
+            if (this.tcpServer.Start(iPAddress, port) != null)
+            {
+                ShowMessage("Listen on" + port);
+            }
 
             // 禁用按钮，防止多次点击
             button_ListenTCP.Enabled = false;
@@ -1383,15 +1386,19 @@ namespace AuthHost
             }
         }
 
-        private void ShowUIRequest(string msg, bool restart) 
+        private void ShowUIRequest(string msg, byte flag) 
         { 
-            if(restart)
+            if(flag == 0x00)
             {
                 ShowMessage("UI Request On Restart:");
             }
-            else
+            else if(flag == 0x01) 
             {
                 ShowMessage("UI Request On Outcome:");
+            }
+            else if( flag == 0x02)
+            {
+                ShowMessage("UI Request Message:");
             }
             //Message Identifier
             string tmp = "";
@@ -1530,42 +1537,50 @@ namespace AuthHost
                 AppendLog($"ArgumentOutOfRangeException: {e.Message}\nStackTrace: {e.StackTrace}");
             }
             //Value Qualifier:
-            tmp = msg.Substring(10, 2);
-            string valueQualifier = "";
-            try
-            {
-                if (tmp == "20")
-                {
-                    valueQualifier = "Balance";
-                    ShowMessage("Value Qualifier: "+ valueQualifier);
-                }
-                else
-                {
-                    ShowMessage("Value Qualifier: N/A");
-                }
-            }
-            catch (ArgumentOutOfRangeException e)
-            {
-                AppendLog($"ArgumentOutOfRangeException: {e.Message}\nStackTrace: {e.StackTrace}");
-            }
+
+            ShowMessage("Value Qualifier: N/A");    //for FIME Tool Pure Test Only
+
+            //tmp = msg.Substring(10, 2);
+            //string valueQualifier = "";
+            //try
+            //{
+            //    if (tmp == "20")
+            //    {
+            //        valueQualifier = "Balance";
+            //        ShowMessage("Value Qualifier: "+ valueQualifier);
+            //    }
+            //    else
+            //    {
+            //        ShowMessage("Value Qualifier: N/A");
+            //    }
+            //}
+            //catch (ArgumentOutOfRangeException e)
+            //{
+            //    AppendLog($"ArgumentOutOfRangeException: {e.Message}\nStackTrace: {e.StackTrace}");
+            //}
+
+
             //Value
-            tmp = msg.Substring(12, 12);
-            try
-            {
-                if(valueQualifier == "Balance")
-                {
-                    ShowMessage("Value :" + tmp);
-                }
-                else
-                {
-                    ShowMessage("Value : N/A");
-                }
-            }
-            catch (ArgumentOutOfRangeException e)
-            {
-                AppendLog("Show Value fail!length invalid!");
-                AppendLog($"ArgumentOutOfRangeException: {e.Message}\nStackTrace: {e.StackTrace}");
-            }
+            ShowMessage("Value : N/A");
+
+            //tmp = msg.Substring(12, 12);
+            //try
+            //{
+            //    if(valueQualifier == "Balance")
+            //    {
+            //        ShowMessage("Value :" + tmp);
+            //    }
+            //    else
+            //    {
+            //        ShowMessage("Value : N/A");
+            //    }
+            //}
+            //catch (ArgumentOutOfRangeException e)
+            //{
+            //    AppendLog("Show Value fail!length invalid!");
+            //    AppendLog($"ArgumentOutOfRangeException: {e.Message}\nStackTrace: {e.StackTrace}");
+            //}
+
             //Currency Code
             ShowMessage("Currency Code : N/A"); //for FIME Test Special request
 
@@ -1738,11 +1753,11 @@ namespace AuthHost
                     }
                     else if(kvp.Key == "DF8116")
                     {
-                        ShowUIRequest(kvp.Value, false);
+                        ShowUIRequest(kvp.Value, 0x00);
                     }
                     else if(kvp.Key == "DF8117")
                     {
-                        ShowUIRequest(kvp.Value, true);
+                        ShowUIRequest(kvp.Value, 0x01);
                     }
                     else if(kvp.Key == "FF8105")
                     {
@@ -1778,13 +1793,19 @@ namespace AuthHost
                 if (tLVObject.Exist("DF8116"))
                 {
                     ShowMessage("________________________________________________");
-                    ShowUIRequest(tLVObject.Get("DF8116"), false);
+                    ShowUIRequest(tLVObject.Get("DF8116"), 0x01);
                 }
                 if (tLVObject.Exist("DF8117"))
                 {
                     ShowMessage("________________________________________________");
-                    ShowUIRequest(tLVObject.Get("DF8117"), true);
+                    ShowUIRequest(tLVObject.Get("DF8117"), 0x00);
                 }
+                if (tLVObject.Exist("DF8118"))
+                {
+                    ShowMessage("________________________________________________");
+                    ShowUIRequest(tLVObject.Get("DF8118"), 0x02);
+                }
+
                 if (tLVObject.Exist("FF8105"))
                 {
                     ShowMessage("________________________________________________");

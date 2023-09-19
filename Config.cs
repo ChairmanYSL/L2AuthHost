@@ -89,6 +89,7 @@ namespace AuthHost
 
         public void initConfig()
         {
+            int index;
             if(Directory.Exists(this.CfgDir))
             {
                 if (this.curBrandName == null)
@@ -124,7 +125,18 @@ namespace AuthHost
                     }
                     foreach (string file in files)
                     {
-                        this.AIDList.Add(Path.GetFileName(file));
+                        string fileName = Path.GetFileName(file);
+                        index = fileName.IndexOf("_");
+                        if(index > -1)
+                        {
+                            fileName = fileName.Substring(index+1);
+                        }
+                        index = fileName.IndexOf('.');
+                        if(index > -1)
+                        {
+                            fileName = fileName.Substring(0, index);
+                        }
+                        this.AIDList.Add(fileName);
                     }
                 }
                 else
@@ -142,7 +154,18 @@ namespace AuthHost
                     }
                     foreach (string file in files)
                     {
-                        this.CAPKList.Add(Path.GetFileName(file));
+                        string fileName = Path.GetFileName(file);
+                        index = fileName.IndexOf("_");
+                        if (index > -1)
+                        {
+                            fileName = fileName.Substring(index + 1);
+                        }
+                        index = fileName.IndexOf('.');
+                        if (index > -1)
+                        {
+                            fileName = fileName.Substring(0, index);
+                        }
+                        this.CAPKList.Add(fileName);
                     }
                 }
                 else
@@ -159,7 +182,18 @@ namespace AuthHost
                     }
                     foreach (string file in files)
                     {
-                        this.DRLList.Add(Path.GetFileName(file));
+                        string fileName = Path.GetFileName(file);
+                        index = fileName.IndexOf("_");
+                        if (index > -1)
+                        {
+                            fileName = fileName.Substring(index + 1);
+                        }
+                        index = fileName.IndexOf('.');
+                        if (index > -1)
+                        {
+                            fileName = fileName.Substring(0, index);
+                        }
+                        this.DRLList.Add(fileName);
                     }
                 }
                 else
@@ -176,7 +210,18 @@ namespace AuthHost
                     }
                     foreach (string file in files)
                     {
-                        this.ExcpFileList.Add(Path.GetFileName(file));
+                        string fileName = Path.GetFileName(file);
+                        index = fileName.IndexOf("_");
+                        if (index > -1)
+                        {
+                            fileName = fileName.Substring(index + 1);
+                        }
+                        index = fileName.IndexOf('.');
+                        if (index > -1)
+                        {
+                            fileName = fileName.Substring(0, index);
+                        }
+                        this.ExcpFileList.Add(fileName);
                     }
                 }
                 else
@@ -193,7 +238,18 @@ namespace AuthHost
                     }
                     foreach (string file in files)
                     {
-                        this.TermParList.Add(Path.GetFileName(file));
+                        string fileName = Path.GetFileName(file);
+                        index = fileName.IndexOf("_");
+                        if (index > -1)
+                        {
+                            fileName = fileName.Substring(index + 1);
+                        }
+                        index = fileName.IndexOf('.');
+                        if (index > -1)
+                        {
+                            fileName = fileName.Substring(0, index);
+                        }
+                        this.TermParList.Add(fileName);
                     }
                 }
                 else
@@ -210,7 +266,18 @@ namespace AuthHost
                     }
                     foreach (string file in files)
                     {
-                        this.RevokeyList.Add(Path.GetFileName(file));
+                        string fileName = Path.GetFileName(file);
+                        index = fileName.IndexOf("_");
+                        if (index > -1)
+                        {
+                            fileName = fileName.Substring(index + 1);
+                        }
+                        index = fileName.IndexOf('.');
+                        if (index > -1)
+                        {
+                            fileName = fileName.Substring(0, index);
+                        }
+                        this.RevokeyList.Add(fileName);
                     }
                 }
                 else
