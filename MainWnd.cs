@@ -323,6 +323,7 @@ namespace AuthHost
             this.checkBox_AmtPres.Checked = true;
             this.checkBox_AmtOthPres.Checked = true;
             this.checkBox_TransTypePres.Checked = true;
+            this.checkBox_OnlineStatus.Checked = true;
         }
 
         private void LoadBaudComboBox()
@@ -880,6 +881,16 @@ namespace AuthHost
             string sendData = "";
             int len;
 
+            AppendLog("Online Status :" + this.checkBox_OnlineStatus.Checked);
+            if (!this.checkBox_OnlineStatus.Checked)
+            {
+                sendData += "DF81390100";
+            }
+            else
+            {
+                sendData += "DF81390101";
+            }
+
             if (respCode != null)
             {
                 AppendLog("respCode in TextBox:" + respCode);
@@ -906,12 +917,29 @@ namespace AuthHost
             }
             if(script != null)
             {
-                sendData += "71";
+                sendData += "DF8138";
                 len = script.Length / 2;
-                sendData += len.ToString("X2");
+                if (len > 0 && len <= 127)  //single byte len
+                {
+                    sendData += len.ToString("X2");
+                }
+                else if (len > 127 && len <= 255)   //double byte len
+                {
+                    sendData += "81";
+                    sendData += len.ToString("X2");
+                }
+                else   //tripol byte len
+                {
+                    sendData += "82";
+                    high = (byte)(sendData.Length / 2 / 256);
+                    low = (byte)(sendData.Length / 2 % 256);
+                    sendData += high.ToString("X2");
+                    sendData += low.ToString("X2");
+                }
+
                 sendData += script;
-                AppendLog("Current Script 71:" + script);
-                ShowMessage("Current Script 71:" + script);
+                AppendLog("Current Script:" + script);
+                ShowMessage("Current Script:" + script);
             }
 
             if(sendData.Length > 0)
@@ -2034,6 +2062,11 @@ namespace AuthHost
 
             // 应用修改后的配置
             LogManager.ReconfigExistingLoggers();
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

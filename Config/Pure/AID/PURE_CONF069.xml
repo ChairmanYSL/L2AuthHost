@@ -16,7 +16,7 @@
     <Cfg label="DF32" Name="Status check supported flag" Format="b 1">01</Cfg>
     <Cfg label="DF37" Name="Contactless application Capabilities" Format="b 5">36004003F9</Cfg>
     <Cfg label="DF38" Name="Transaction type value for AAT" Format="b 1">90</Cfg>
-    <Cfg label="DF39" Name="Additional Tag Object List (ATOL)" Format="b 256">9F029F039F26829F369F279F109F1A955F2A9A9C9F379F35579F34845F345AC79F339F739F779F45</Cfg>
+    <Cfg label="DF39" Name="Additional Tag Object List (ATOL)" Format="b 256">9F029F039F26829F369F279F109F1A955F2A9A9C9F379F35579F34845F345AC79F339F739F779F459F429F0A</Cfg>
     <Cfg label="DF40" Name="Contactless POS implementation options" Format="b 1">26</Cfg>
     <Cfg label="DF41" Name="POS timeout (Long tap)" Format="b 2">1000</Cfg>
     <Cfg label="DF44" Name="Mandatory Tag Object List (MTOL)" Format="b 256">9F42009F0A00</Cfg>
@@ -39,7 +39,7 @@
     <Cfg label="DF32" Name="Status check supported flag" Format="b 1">00</Cfg>
     <Cfg label="DF37" Name="Contactless application Capabilities" Format="b 5">36004003F9</Cfg>
     <Cfg label="DF38" Name="Transaction type value for AAT" Format="b 1">90</Cfg>
-    <Cfg label="DF39" Name="Additional Tag Object List (ATOL)" Format="b 256">9F029F039F26829F369F279F109F1A955F2A9A9C9F379F35579F34845F345AC79F339F739F779F45</Cfg>
+    <Cfg label="DF39" Name="Additional Tag Object List (ATOL)" Format="b 256">9F029F039F26829F369F279F109F1A955F2A9A9C9F379F35579F34845F345AC79F339F739F779F459F429F0A</Cfg>
     <Cfg label="DF40" Name="Contactless POS implementation options" Format="b 1">26</Cfg>
     <Cfg label="DF41" Name="POS timeout (Long tap)" Format="n 4">1000</Cfg>
     <Cfg label="DF44" Name="Mandatory Tag Object List (MTOL)" Format="b 256">9F42009F0A00</Cfg>
@@ -62,7 +62,7 @@
     <Cfg label="DF32" Name="Support Status Check" Format="b 1">01</Cfg>
     <Cfg label="DF37" Name="Contactless application Capabilities" Format="b 5">36004003F9</Cfg>
     <Cfg label="DF38" Name="Transaction type value for AAT" Format="b 1">90</Cfg>
-    <Cfg label="DF39" Name="Additional Tag Object List (ATOL)" Format="b 256">9F029F039F26829F369F279F109F1A955F2A9A9C9F379F35579F34845F345AC79F339F739F779F45</Cfg>
+    <Cfg label="DF39" Name="Additional Tag Object List (ATOL)" Format="b 256">9F029F039F26829F369F279F109F1A955F2A9A9C9F379F35579F34845F345AC79F339F739F779F459F429F0A</Cfg>
     <Cfg label="DF40" Name="Contactless POS implementation options" Format="b 1">26</Cfg>
     <Cfg label="DF41" Name="POS timeout (Long tap)" Format="n 4">1000</Cfg>
     <Cfg label="DF44" Name="Mandatory Tag Object List (MTOL)" Format="b 256">9F42009F0A00</Cfg>
@@ -86,7 +86,7 @@
     <Cfg label="DF32" Name="Status check supported flag" Format="b 1">00</Cfg>
     <Cfg label="DF37" Name="Contactless application Capabilities" Format="b 5">36004003F9</Cfg>
     <Cfg label="DF38" Name="Transaction type value for AAT" Format="b 1">90</Cfg>
-    <Cfg label="DF39" Name="Additional Tag Object List (ATOL)" Format="b 256">9F029F039F26829F369F279F109F1A955F2A9A9C9F379F35579F34845F345AC79F339F739F779F45</Cfg>
+    <Cfg label="DF39" Name="Additional Tag Object List (ATOL)" Format="b 256">9F029F039F26829F369F279F109F1A955F2A9A9C9F379F35579F34845F345AC79F339F739F779F459F429F0A</Cfg>
     <Cfg label="DF40" Name="Contactless POS implementation options" Format="b 1">26</Cfg>
     <Cfg label="DF41" Name="POS timeout (Long tap)" Format="n 4">1000</Cfg>
     <Cfg label="DF44" Name="Mandatory Tag Object List (MTOL)" Format="b 256">9F42009F0A00</Cfg>
@@ -110,7 +110,7 @@
     <Cfg label="DF32" Name="Status check supported flag" Format="b 1">00</Cfg>
     <Cfg label="DF37" Name="Contactless application Capabilities" Format="b 5">36004003F9</Cfg>
     <Cfg label="DF38" Name="Transaction type value for AAT" Format="b 1">90</Cfg>
-    <Cfg label="DF39" Name="Additional Tag Object List (ATOL)" Format="b 256">9F029F039F26829F369F279F109F1A955F2A9A9C9F379F35579F34845F345AC79F339F739F779F45</Cfg>
+    <Cfg label="DF39" Name="Additional Tag Object List (ATOL)" Format="b 256">9F029F039F26829F369F279F109F1A955F2A9A9C9F379F35579F34845F345AC79F339F739F779F459F429F0A</Cfg>
     <Cfg label="DF40" Name="Contactless POS implementation options" Format="b 1">26</Cfg>
     <Cfg label="DF41" Name="POS timeout (Long tap)" Format="n 4">1000</Cfg>
     <Cfg label="DF44" Name="Mandatory Tag Object List (MTOL)" Format="b 256">9F42009F0A00</Cfg>
@@ -131,7 +131,7 @@
     <Cfg label="DF32" Name="Status check supported flag" Format="b 1">00</Cfg>
     <Cfg label="DF37" Name="Contactless application Capabilities" Format="b 5">36004003F9</Cfg>
     <Cfg label="DF38" Name="Transaction type value for AAT" Format="b 1">90</Cfg>
-    <Cfg label="DF39" Name="Additional Tag Object List (ATOL)" Format="b 256">9F029F039F26829F369F279F109F1A955F2A9A9C9F379F35579F34845F345AC79F339F739F779F45</Cfg>
+    <Cfg label="DF39" Name="Additional Tag Object List (ATOL)" Format="b 256">9F029F039F26829F369F279F109F1A955F2A9A9C9F379F35579F34845F345AC79F339F739F779F459F429F0A</Cfg>
     <Cfg label="DF40" Name="Contactless POS implementation options" Format="b 1">26</Cfg>
     <Cfg label="DF41" Name="POS timeout (Long tap)" Format="n 4">1000</Cfg>
     <Cfg label="DF44" Name="Mandatory Tag Object List (MTOL)" Format="b 256">9F42009F0A00</Cfg>
@@ -152,7 +152,7 @@
     <Cfg label="DF32" Name="Status check supported flag" Format="b 1">00</Cfg>
     <Cfg label="DF37" Name="Contactless application Capabilities" Format="b 5">36004003F9</Cfg>
     <Cfg label="DF38" Name="Transaction type value for AAT" Format="b 1">90</Cfg>
-    <Cfg label="DF39" Name="Additional Tag Object List (ATOL)" Format="b 256">9F029F039F26829F369F279F109F1A955F2A9A9C9F379F35579F34845F345AC79F339F739F779F45</Cfg>
+    <Cfg label="DF39" Name="Additional Tag Object List (ATOL)" Format="b 256">9F029F039F26829F369F279F109F1A955F2A9A9C9F379F35579F34845F345AC79F339F739F779F459F429F0A</Cfg>
     <Cfg label="DF40" Name="Contactless POS implementation options" Format="b 1">26</Cfg>
     <Cfg label="DF41" Name="POS timeout (Long tap)" Format="n 4">1000</Cfg>
     <Cfg label="DF44" Name="Mandatory Tag Object List (MTOL)" Format="b 256">9F42009F0A00</Cfg>
@@ -173,7 +173,7 @@
     <Cfg label="DF32" Name="Status check supported flag" Format="b 1">00</Cfg>
     <Cfg label="DF37" Name="Contactless application Capabilities" Format="b 5">36004003F9</Cfg>
     <Cfg label="DF38" Name="Transaction type value for AAT" Format="b 1">90</Cfg>
-    <Cfg label="DF39" Name="Additional Tag Object List (ATOL)" Format="b 256">9F029F039F26829F369F279F109F1A955F2A9A9C9F379F35579F34845F345AC79F339F739F779F45</Cfg>
+    <Cfg label="DF39" Name="Additional Tag Object List (ATOL)" Format="b 256">9F029F039F26829F369F279F109F1A955F2A9A9C9F379F35579F34845F345AC79F339F739F779F459F429F0A</Cfg>
     <Cfg label="DF40" Name="Contactless POS implementation options" Format="b 1">26</Cfg>
     <Cfg label="DF41" Name="POS timeout (Long tap)" Format="n 4">1000</Cfg>
     <Cfg label="DF44" Name="Mandatory Tag Object List (MTOL)" Format="b 256">9F42009F0A00</Cfg>
@@ -196,7 +196,7 @@
     <Cfg label="DF32" Name="Status check supported flag" Format="b 1">00</Cfg>
     <Cfg label="DF37" Name="Contactless application Capabilities" Format="b 5">36004003F9</Cfg>
     <Cfg label="DF38" Name="Transaction type value for AAT" Format="b 1">90</Cfg>
-    <Cfg label="DF39" Name="Additional Tag Object List (ATOL)" Format="b 256">9F02009F03009F26008200009F36009F27009F10009F1A00955F2A9A9C9F379F35579F34845F345AC79F339F739F779F45</Cfg>
+    <Cfg label="DF39" Name="Additional Tag Object List (ATOL)" Format="b 256">9F029F039F26829F369F279F109F1A955F2A9A9C9F379F35579F34845F345AC79F339F739F779F459F429F0A</Cfg>
     <Cfg label="DF40" Name="Contactless POS implementation options" Format="b 1">26</Cfg>
     <Cfg label="DF41" Name="POS timeout (Long tap)" Format="n 4">1000</Cfg>
     <Cfg label="DF44" Name="Mandatory Tag Object List (MTOL)" Format="b 256">8C0000570000</Cfg>
